@@ -45,11 +45,11 @@ veles-cli masternode status
 
 ## Usage:
 ```
-Rhenium-cli masternode status #To check your MN status
-Rhenium-cli getinfo #To get general info such as Rhenium version and current block numnber
-Rhenium-cli mnsync status #To check if your MN is synced.
+veles-cli masternode status #To check your MN status
+veles-cli getinfo #To get general info such as Rhenium version and current block numnber
+veles-cli mnsync status #To check if your MN is synced.
 ```
-Also, if you want to check/start/stop **Rhenium**, run one of the following commands as **root**:
+Also, if you want to check/start/stop **Veles**, run one of the following commands as **root**:
 
 ```
 systemctl status veles #To check if Veles service is running
