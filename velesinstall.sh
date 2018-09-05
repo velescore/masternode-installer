@@ -9,7 +9,7 @@ COIN_PATH='/usr/local/bin/'
 COIN_TGZ='https://github.com/Velescore/veles/releases/download/V.1.0.0/velesd-linux.zip'
 COIN_ZIP=$(echo $COIN_TGZ | awk -F'/' '{print $NF}')
 COIN_NAME='Veles'
-COIN_PORT=2551
+COIN_PORT=25521
 RPC_PORT=25522
 
 NODEIP=$(curl -s4 api.ipify.org)
