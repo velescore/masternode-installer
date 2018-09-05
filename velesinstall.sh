@@ -6,22 +6,19 @@ CONFIGFOLDER='/root/.Veles'
 COIN_DAEMON='velesd'
 COIN_CLI='veles-cli'
 COIN_PATH='/usr/local/bin/'
-COIN_TGZ='https://github.com/Velescore/veles/releases/download/V.1.0.0/veles-linux-command-line.zip'
+COIN_TGZ='https://github.com/Velescore/veles/releases/download/V.1.0.0/velesd-linux.zip'
 COIN_ZIP=$(echo $COIN_TGZ | awk -F'/' '{print $NF}')
-COIN_NAME='veles'
-COIN_PORT=25521
+COIN_NAME='Veles'
+COIN_PORT=2551
 RPC_PORT=25522
 
-NODEIP=$(curl -s4 icanhazip.com)
+NODEIP=$(curl -s4 api.ipify.org)
 
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
-function download zip_unzip () {
-   sudo apt-get install zip unzip
-   } 
 
 function download_node() {
   echo -e "Downloading ${GREEN}$COIN_NAME${NC}."
@@ -122,7 +119,7 @@ maxconnections=256
 masternode=1
 externalip=$NODEIP:$COIN_PORT
 masternodeprivkey=$COINKEY
-addnode=
+addnode=80.211.97.48
 EOF
 }
 
@@ -141,7 +138,7 @@ function get_ip() {
   declare -a NODE_IPS
   for ips in $(netstat -i | awk '!/Kernel|Iface|lo/ {print $1," "}')
   do
-    NODE_IPS+=($(curl --interface $ips --connect-timeout 2 -s4 icanhazip.com))
+    NODE_IPS+=($(curl --interface $ips --connect-timeout 2 -s4 api.ipify.org))
   done
 
   if [ ${#NODE_IPS[@]} -gt 1 ]
