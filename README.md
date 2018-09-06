@@ -52,8 +52,8 @@ veles-cli mnsync status #To check if your MN is synced.
 Also, if you want to check/start/stop **Veles**, run one of the following commands as **root**:
 
 ```
-systemctl status veles #To check if Veles service is running
-systemctl start veles #To start Veles service
-systemctl stop veles #To stop Veles service
-systemctl is-enabled veles #To check if Veles service is enabled on boot
+systemctl status Veles.service #To check if Veles service is running
+systemctl start Veles.service #To start Veles service
+systemctl stop Veles.service #To stop Veles service
+systemctl is-enabled Veles.service #To check if Veles service is enabled on boot
 ```
