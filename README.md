@@ -5,7 +5,7 @@ Shell script to install a [Veles Masternode](http://veles.network/) on a Linux s
 
 ## VPS installation
 ```
-wget -N https://raw.githubusercontent.com/Velescore/veles-masternode-install/V.1.0.0/velesinstall.sh
+wget -N https://raw.githubusercontent.com/Velescore/veles-masternode-install/master/velesinstall.sh
 bash velesinstall.sh
 ```
 ***
