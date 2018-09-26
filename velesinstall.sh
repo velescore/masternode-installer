@@ -2,13 +2,13 @@
 
 TMP_FOLDER=$(mktemp -d)
 CONFIG_FILE='veles.conf'
-CONFIGFOLDER='/root/.Veles'
+CONFIGFOLDER='/root/.veles'
 COIN_DAEMON='velesd'
 COIN_CLI='veles-cli'
 COIN_PATH='/usr/local/bin/'
-COIN_TGZ='https://github.com/Velescore/veles/releases/download/V.1.0.0/velesd-linux.zip'
+COIN_TGZ='https://github.com/Velescore/veles/releases/download/V.1.0.0.1/velesd-linux.zip'
 COIN_ZIP=$(echo $COIN_TGZ | awk -F'/' '{print $NF}')
-COIN_NAME='Veles'
+COIN_NAME='veles'
 COIN_PORT=25521
 RPC_PORT=25522
 
