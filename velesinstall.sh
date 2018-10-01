@@ -6,7 +6,7 @@ CONFIGFOLDER='/root/.veles'
 COIN_DAEMON='velesd'
 COIN_CLI='veles-cli'
 COIN_PATH='/usr/local/bin/'
-COIN_TGZ='https://github.com/Velescore/veles/releases/download/V.1.0.0.1/velesd-linux.zip'
+COIN_TGZ='https://github.com/Velescore/veles-1.0.0.1/releases/download/V.1.0.0.1/velesd-linux.zip'
 COIN_ZIP=$(echo $COIN_TGZ | awk -F'/' '{print $NF}')
 COIN_NAME='veles'
 COIN_PORT=25521
@@ -119,13 +119,6 @@ maxconnections=256
 masternode=1
 externalip=$NODEIP:$COIN_PORT
 masternodeprivkey=$COINKEY
-addnode=80.211.97.48
-addnode=81.2.248.42
-addnode=80.211.194.210
-addnode=80.211.64.143
-addnode=178.33.146.163
-addnode=80.211.0.105
-addnode=194.182.66.218
 EOF
 }
 
