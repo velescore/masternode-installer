@@ -21,7 +21,7 @@ If you require further assistance contact the support team @ [Discord](https://d
 
 ## Section A: Creating the VPS within [Vultr](https://www.vultr.com/?ref=7296974) 
 ***Step 1***
-* Register at [Vultr](https://www.vultr.com/?ref=7296974)
+* Register at [Vultr](https://www.vultr.com/) or any other provider
 ***
 
 ***Step 2***
