@@ -118,7 +118,7 @@ If you require further assistance contact the support team @ [Discord](https://d
 ***Step 9***
 * Paste the code below into the Bitvise terminal then press enter
 
-`./masternode.sh`-r v16 -n 
+`bash masternode.sh`-r v16 -n 
 
 ![Example-Bash](https://i.imgur.com/2sEb9Is.jpg)
 
