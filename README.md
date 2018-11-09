@@ -147,7 +147,7 @@ If you require further assistance contact the support team @ [Discord](https://d
 ***Step 2***
 * Generate new address trough debug console with command 
 'getnewaddress "" "legacy"'
-![Example-console](https://imgur.com/sgzPq00)
+![Example-console](https://i.imgur.com/sgzPq00.png)
 * Send EXACLY 2,000 VLS coins to address you generated on local wallet.
 ***
 
