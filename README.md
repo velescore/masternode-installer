@@ -145,7 +145,10 @@ If you require further assistance contact the support team @ [Discord](https://d
 ***
 
 ***Step 2***
-* Send EXACLY 2,000 VLS coins to a receive address within your wallet.
+* Generate new address trough debug console with command 
+'getnewaddress "" "legacy"'
+![Example-console](https://imgur.com/sgzPq00)
+* Send EXACLY 2,000 VLS coins to address you generated on local wallet.
 ***
 
 ***Step 3***
