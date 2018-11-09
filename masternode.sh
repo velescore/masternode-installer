@@ -1,4 +1,4 @@
-#!/bin/bash
+!/bin/bash
 # version 	v0.1
 # date    	2018-06-17
 # function:	Installation of an Veles masternode with options to install sentinel
