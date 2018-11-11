@@ -130,12 +130,12 @@ function create_dirs() {
     # individual data dirs for now to avoid problems
     echo "* Creating masternode directories"
     mkdir -p ${conf_dir}
-    chown -R root:veles ${conf_dir}
+    chown -R ${user}:${user} ${conf_dir}
     chmod 640 ${conf_dir}
         if [ ! -d "${data_dir}/${name}" ]; then
              echo "creating data directory ${data_dir}/${name}" &>> ${logfile}
              mkdir -p ${data_dir}/${name} &>> ${logfile}
-             chown -R veles:veles ${data_dir}
+             chown -R ${user}:${user} ${data_dir}
         fi
 
 }
