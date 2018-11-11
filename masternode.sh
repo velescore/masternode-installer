@@ -135,7 +135,7 @@ function create_dirs() {
         if [ ! -d "${data_dir}/${name}" ]; then
              echo "creating data directory ${data_dir}/${name}" &>> ${logfile}
              mkdir -p ${data_dir}/${name} &>> ${logfile}
-             chown -R veles:veles ${data_dir}/${name}
+             chown -R veles:veles ${data_dir}
         fi
 
 }
