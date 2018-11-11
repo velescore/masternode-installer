@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 # version 	v0.1
 # date    	2018-06-17
 # function:	Installation of an Veles masternode with options to install sentinel
@@ -66,12 +66,12 @@ function check_distro() {
     if [[ -r /etc/os-release ]]; then
         . /etc/os-release
         if [[ "${VERSION_ID}" != "16.04" ]] && [[ "${VERSION_ID}" != "18.04" ]] ; then
-            echo "Only Ubuntu 16.04 & 18.04 LTS are supported, exiting."
-            exit 1
+            echo "WARNING: Only Ubuntu 16.04 & 18.04 LTS are supported."
+            #exit 1
         fi
     else
-        echo "Only Ubuntu 16.04 & 18.04 LTS are supported, exiting."
-        exit 1
+        echo "WARNING: Only Ubuntu 16.04 & 18.04 LTS are supported, exiting."
+        #exit 1
     fi
 
 }
@@ -130,9 +130,12 @@ function create_dirs() {
     # individual data dirs for now to avoid problems
     echo "* Creating masternode directories"
     mkdir -p ${conf_dir}
+    chown -R root:veles ${conf_dir}
+    chmod 640 ${conf_dir}
         if [ ! -d "${data_dir}/${name}" ]; then
              echo "creating data directory ${data_dir}/${name}" &>> ${logfile}
              mkdir -p ${data_dir}/${name} &>> ${logfile}
+             chown -R veles:veles ${data_dir}/${name}
         fi
 
 }
