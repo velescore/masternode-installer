@@ -115,22 +115,6 @@ If you require further assistance contact the support team @ [Discord](https://d
 
 ***
 
-***Step 9***
-* Paste the code below into the Bitvise terminal then press enter
-
-`bash masternode.sh`-r v16 -n 
-
-![Example-Bash](https://i.imgur.com/2sEb9Is.jpg)
-
-***
-
-***Step 10***
-* Sit back and wait for the install (this will take 10-20 mins) depends on computing power of your server.
-
-![Example-Bash](https://i.imgur.com/9s1nuR1.jpg?1)
-
-***
-
 
 ***Step 11***
 * When prompted to enter your GEN key - press enter
@@ -209,12 +193,6 @@ Click "File Save"
 * Check the status of your masternode within the VPS by using the command below:
 * Connect your VPS and change your user from root to veles by this command:
 `su veles`
-* Now move to this directory
-`cd /var/lib/veles`
-* And run script 
-`./veles.menu.sh`
-
-![Example-create](https://i.imgur.com/NmaGIv7.png)
 
 
 
