@@ -199,16 +199,16 @@ Click "File Save"
   
  **Usage:**
 
-*veles-cli masternode status #To check your MN status
-*veles-cli getblockchaininfo #To get general info such as Veles version and current block numnber
-*veles-cli mnsync status #To check if your MN is synced.
+* veles-cli masternode status #To check your MN status
+* veles-cli getblockchaininfo #To get general info such as Veles version and current block numnber
+* veles-cli mnsync status #To check if your MN is synced.
 
 Also, if you want to check/start/stop Veles, run one of the following commands as user(veles):
 
-*systemctl status veles.service #To check if Veles service is running
-*systemctl start veles.service #To start Veles service
-*systemctl stop veles.service #To stop Veles service
-*systemctl is-enabled veles.service #To check if Veles service is enabled on boot
+* systemctl status veles.service #To check if Veles service is running
+* systemctl start veles.service #To start Veles service
+* systemctl stop veles.service #To stop Veles service
+* systemctl is-enabled veles.service #To check if Veles service is enabled on boot
 
 If you do, congratulations! You have now setup a masternode. If you do not, please contact support and they will assist you.  
 ***
