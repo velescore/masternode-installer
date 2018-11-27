@@ -116,10 +116,12 @@ If you require further assistance contact the support team @ [Discord](https://d
 ***
 
 
-***Step 11***
+***Step 9***
 * When prompted to enter your GEN key - press enter
 
 ![Example-installing](https://i.imgur.com/UGUyMns.png)
+
+* later you will find your generated key in your veles.conf
 ***
 
 ## Section D: Preparing the Local wallet
@@ -192,9 +194,21 @@ Click "File Save"
 ***step 4***
 * Check the status of your masternode within the VPS by using the command below:
 * Connect your VPS and change your user from root to veles by this command:
-`su veles`
+  
+  su veles
+  
+ **Usage:**
 
+veles-cli masternode status #To check your MN status
+veles-cli getblockchaininfo #To get general info such as Veles version and current block numnber
+veles-cli mnsync status #To check if your MN is synced.
 
+Also, if you want to check/start/stop Veles, run one of the following commands as user(veles):
+
+systemctl status veles.service #To check if Veles service is running
+systemctl start veles.service #To start Veles service
+systemctl stop veles.service #To stop Veles service
+systemctl is-enabled veles.service #To check if Veles service is enabled on boot
 
 If you do, congratulations! You have now setup a masternode. If you do not, please contact support and they will assist you.  
 ***
