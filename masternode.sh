@@ -1,4 +1,11 @@
 #!/bin/bash
+# version 	v0.1
+# date    	2018-11-27
+# function:	Installation of an Veles masternode
+# website:      https://veles.network
+# Discord: 	Mdfkbtc#8759
+# Twitter:      https://twitter.com/mdfkbtc
+##########################################################
 
 TMP_FOLDER=$(mktemp -d)
 USER='veles'
