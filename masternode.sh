@@ -215,7 +215,7 @@ function important_information() {
  echo -e "MASTERNODE PRIVATEKEY is: ${GREEN}$COINKEY${NC}"
  echo -e "Please check ${GREEN}$COIN_NAME${NC} daemon is running with the following command: ${GREEN}systemctl status $COIN_NAME.service${NC}"
  echo -e "Use ${GREEN}$COIN_CLI masternode status${NC} to check your MN."
- echo -e "For help join discord ${RED}https://discord.gg/P528fGg ..."
+ echo -e "For help join discord ${RED}https://discord.gg/P528fGg${NC} ..."
  if [[ -n $SENTINEL_REPO  ]]; then
   echo -e "${GREEN}Sentinel${NC} is installed in ${RED}$CONFIGFOLDER/sentinel${NC}"
   echo -e "Sentinel logs is: ${GREEN}$CONFIGFOLDER/sentinel.log${NC}"
