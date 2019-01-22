@@ -64,10 +64,17 @@ function download_node() {
   cd ${COIN_TEMP_PATH} && tar xvzf "./${COIN_TGZ_NAME}" >/dev/null 2>&1 || exit_with_error "Unable extract installation archive"
 }
 
+function enable_reindex_next_start() {
+  # reindex after update
+  sed -i.bak "s/-daemon -conf/-daemon -reindex -conf/g" /etc/systemd/system/veles.service
+}
+
+function disable_reindex_next_start() {
+  sed -i.bak "s/-daemon -reindex -conf/-daemon -conf/g" /etc/systemd/system/veles.service
+}
+
 function start_service() {
   systemctl start "${COIN_SVC_NAME}" || exit_with_error "Unable to start the service: ${COIN_SVC_NAME}"
-  #clear 
-  #su $USER
 }
 
 function stop_service() {
@@ -112,6 +119,8 @@ printf "\n${STAR} Installing new daemon ..."
 install_new_daemon
 cleanup
 printf "\n${STAR} Starting Veles service ..."
+disable_reindex_next_start
 start_service
+disable_reindex_next_start
 printf -e "\n${GREEN}Congratulations, your daemon has been succesfully updated:${NC}\n"
 print_daemon_version
