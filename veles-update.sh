@@ -67,10 +67,12 @@ function download_node() {
 function enable_reindex_next_start() {
   # reindex after update
   sed -i.bak "s/-daemon -conf/-daemon -reindex -conf/g" /etc/systemd/system/veles.service
+  systemctl daemon-reload
 }
 
 function disable_reindex_next_start() {
   sed -i.bak "s/-daemon -reindex -conf/-daemon -conf/g" /etc/systemd/system/veles.service
+  systemctl daemon-reload
 }
 
 function start_service() {
@@ -122,5 +124,6 @@ printf "\n${STAR} Starting Veles service ..."
 disable_reindex_next_start
 start_service
 disable_reindex_next_start
-printf -e "\n${GREEN}Congratulations, your daemon has been succesfully updated:${NC}\n"
+printf "\n${STAR} Your newly installed Veles Core version is:"
 print_daemon_version
+printf "\n${GREEN}Congratulations, your Veles Core has been succesfully updated!${NC}\n"
