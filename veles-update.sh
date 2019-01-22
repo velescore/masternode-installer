@@ -30,7 +30,7 @@ STAR="${GREEN}*${NC}"
 function exit_with_error()
 {
   if [ $# -gt 0 ]; then
-    printf "\n${RED}ERROR: $@${NC}\n"
+    printf "\n\n${RED}ERROR:${NC} $@ ${RED} !!! ${NC}\n\n"
   fi
   exit 1
 }
