@@ -19,7 +19,7 @@ DAEMON_LATEST="https://api.github.com/repos/Velescore/Veles"
 #LATEST_VERSION=$(curl -s "http://explorer.veles.network/release/velesLinux.currentVersion")
 #SHA256_SUM_URL="http://explorer.veles.network/release/velesLinux.sha256sum"
 #MD5_SUM_URL="http://explorer.veles.network/release/velesLinux.md5sum"
-DOWNLOAD_URL="https://github.com/Velescore/Veles/releases/download/v0.17.0.19/velesLinux.tar.gz"
+DOWNLOAD_URL="https://github.com/Velescore/Veles/releases/download/v0.17.0.20/velesLinux.tar.gz"
 # Prettier output
 RED='\033[1;31m'
 GREEN='\033[1;32m'
