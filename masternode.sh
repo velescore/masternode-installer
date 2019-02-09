@@ -126,29 +126,28 @@ EOF
 }
 
 function create_key() {
-  if ! [ -z "$1" ] && [ "$1" == '--nonint' ]; then # skip reading in non-interactive mode
+  if [ $ARG1 == '--nonint' ]; then # skip reading in non-interactive mode
     echo "[non interactive mode] Generating new masternode private key ..."
   else
-    echo $@
     echo -e "Enter your ${RED}$COIN_NAME Masternode Private Key${NC}. Leave it blank to generate a new ${RED}Masternode Private Key${NC} for you:"
     read -e COINKEY
   fi
   if [[ -z "$COINKEY" ]]; then
-  $COIN_PATH$COIN_DAEMON -daemon
-  sleep 30
-  if [ -z "$(ps axo cmd:100 | grep $COIN_DAEMON)" ]; then
-    echo -e "${RED}$COIN_NAME server couldn not start. Check /var/log/syslog for errors.{$NC}"
-    exit 1
-  fi
-  COINKEY=$($COIN_PATH$COIN_CLI masternode genkey)
-  if [ "$?" -gt "0" ];then
-    echo -e "${RED}Wallet not fully loaded. Let us wait and try again to generate the Private Key${NC}"
+    $COIN_PATH$COIN_DAEMON -daemon
     sleep 30
+    if [ -z "$(ps axo cmd:100 | grep $COIN_DAEMON)" ]; then
+      echo -e "${RED}$COIN_NAME server couldn not start. Check /var/log/syslog for errors.{$NC}"
+      exit 1
+    fi
     COINKEY=$($COIN_PATH$COIN_CLI masternode genkey)
+    if [ "$?" -gt "0" ];then
+      echo -e "${RED}Wallet not fully loaded. Let us wait and try again to generate the Private Key${NC}"
+      sleep 30
+      COINKEY=$($COIN_PATH$COIN_CLI masternode genkey)
+    fi
+    $COIN_PATH$COIN_CLI stop
   fi
-  $COIN_PATH$COIN_CLI stop
-fi
-clear
+  clear
 }
 
 function update_config() {
@@ -248,15 +247,18 @@ function setup_node() {
  }
 
 
-
 ##### Main #####
-clear
+# Load ze args
+if ! [ -z "$1" ]; then
+  ARG1="${1}"
+else
+  ARG1=""
+fi
 
-clear
 echo "Checking system..."
 checks
 echo "Downlading node ..."
 download_node
 echo "Setting up node ..."
-setup_node
+setup_node 
 echo "Congratulations, installation success!"
