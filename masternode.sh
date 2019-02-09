@@ -32,7 +32,7 @@ BBLUE='\033[1;34m'
 NC='\033[0m'
 ST="${BGREEN} * ${NC}"
 OK="${BLUE}[ ${NC}${BGREEN}ok${NC}${BLUE} ]${NC}"
-ERR="${BLUE}[ ${NC}${BRED}\!\!${NC}${BLUE} ]${NC}"
+ERR="${BLUE}[ ${NC}${BRED}"'!!'"${NC}${BLUE} ]${NC}"
 
 function pok() {
   echo -e "${OK}"
@@ -69,8 +69,8 @@ function create_user() {
     useradd -m $USER && pok || perr
     # TODO: move to another function
     echo -en "${ST} Setting up the user account ...                                       "
-    su - $USER -c "mkdir ~/${CONFIGFOLDER} >/dev/null 2>&1" || perr	"Failed to create datadir: ~/${CONFIGFOLDER}"
-    su - $USER -c "touch ~/${CONFIGFOLDER}/${CONFIG_FILE} >/dev/null 2>&1" || perr "Failed to create config file: ~/${CONFIGFOLDER}/${CONFIG_FILE}"
+    su - $USER -c "mkdir ${CONFIGFOLDER} >/dev/null 2>&1" || perr	"Failed to create datadir: ${CONFIGFOLDER}"
+    su - $USER -c "touch ${CONFIGFOLDER}/${CONFIG_FILE} >/dev/null 2>&1" || perr "Failed to create config file: ${CONFIGFOLDER}/${CONFIG_FILE}"
     pok
   fi
 }
