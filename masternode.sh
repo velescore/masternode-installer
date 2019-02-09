@@ -79,7 +79,10 @@ function create_user() {
 function check_ufw() {
   echo -en "${ST} Checking whether UFW firewall is present ...                          "
   if [ -f "/sbin/ufw" ] && ufw status | grep -wq 'active'; then 
+    pok
     setup_ufw
+  else
+    echo "[ no ]"
   fi
 }
 
@@ -116,14 +119,18 @@ StartLimitBurst=5
 WantedBy=multi-user.target
 EOF
   echo -en "${ST} Reloading systemctl ...                                               "
-  systemctl daemon-reload && pok || perr
-  sleep 3
-  echo -en "${ST} Starting the service ...                                              "
-  systemctl start $COIN_NAME.service && pok || perr
+  systemctl daemon-reload && pok || perr "Failed to reload systemd daemon (systemctl daemon-reload)"
   echo -en "${ST} Setting up the service to auto-start on system boot ...               "
-  systemctl enable $COIN_NAME.service >/dev/null 2>&1 && pok || perr
+  systemctl enable $COIN_NAME.service >/dev/null 2>&1 && pok || perr "Failed to enable systemd servie ${COIN_NAME}.service"
   #u $USER;cd $CONFIGFOLDER
   
+
+}
+
+function start_systemd_service() {
+  echo -en "${ST} Starting ${BYELLOW}${COIN_NAME}${NC} service ...                                            "
+  systemctl start $COIN_NAME.service && $(sleep 1 ; pok) || perr "Failed to start systemd service ${COIN_NAME}.service"
+
   if [[ -z "$(ps axo cmd:100 | egrep $COIN_DAEMON)" ]]; then
     echo -e "${RED}$COIN_NAME is not running${NC}, please investigate. You should start by running the following commands as root:"
     echo -e "${GREEN}systemctl start${NC} $COIN_NAME.service"
@@ -132,7 +139,6 @@ EOF
     exit 1
   fi
 }
-
 
 function create_config() {
   echo -en "${ST} Generating configuration file ...                                     "
@@ -217,7 +223,7 @@ function get_ip() {
   fi
 }
 
-function checks() {
+function check_environment() {
   echo -en "${ST} Checking the installation environment ...                             "
   if [ -n "$(pidof $COIN_DAEMON)" ] || [ -e "$COIN_DAEMOM" ] ; then
     perr "${RED}$COIN_NAME is already installed.${NC}"
@@ -250,12 +256,14 @@ function important_information() {
  echo -e "==================================================================================================================="
 }
 
-function setup_node() {
-  echo -e "Wait for a while install process ${GREEN}start."
+function install_daemon() {
   create_user
   get_ip
   check_ufw
   create_config
+ }
+
+function install_masternode() {
   create_key
   update_config
   important_information
@@ -271,9 +279,9 @@ else
   ARG1=""
 fi
 
-echo "Checking system..."
-checks
+check_environment
 download_node
-echo "Setting up node ..."
-setup_node 
-echo "Congratulations, installation success!"
+install_daemon 
+install_masternode
+
+echo -e "\n${GREEN} *** Congratulations, installation was successful! ***{$NC}\n"
