@@ -92,7 +92,8 @@ function setup_ufw() {
 }
  
 function configure_systemd() {
-  cat << EOF > /etc/systemd/system/$COIN_NAME.service
+  echo -en "${ST} Creating systemd service ...                                          "
+  cat << EOF > /etc/systemd/system/$COIN_NAME.service && pok || perr
 [Unit]
 Description=$COIN_NAME service
 After=network.target
@@ -112,12 +113,14 @@ StartLimitBurst=5
 [Install]
 WantedBy=multi-user.target
 EOF
-   
-  systemctl daemon-reload
+  echo -en "${ST} Reloading systemctl ...                                               "
+  systemctl daemon-reload && pok || perr
   sleep 3
-  systemctl start $COIN_NAME.service
-  systemctl enable $COIN_NAME.service >/dev/null 2>&1
-  su $USER;cd $CONFIGFOLDER
+  echo -en "${ST} Starting the service ...                                              "
+  systemctl start $COIN_NAME.service && pok || perr
+  echo -en "${ST} Setting up the service to auto-start on system boot ...               "
+  systemctl enable $COIN_NAME.service >/dev/null 2>&1 && pok || perr
+  #u $USER;cd $CONFIGFOLDER
   
   if [[ -z "$(ps axo cmd:100 | egrep $COIN_DAEMON)" ]]; then
     echo -e "${RED}$COIN_NAME is not running${NC}, please investigate. You should start by running the following commands as root:"
