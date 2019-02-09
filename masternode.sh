@@ -40,7 +40,11 @@ function pok() {
 
 function perr() {
   echo -e "${ERR}"
-  echo -e "\n${RED}Done: An error has occured, the installation has been terminated.${NC}"
+  if [ -z $1 ]; then
+    echo -e "\n${RED}Done: The installation has been terminated because an error has occured.${NC}"
+  else
+    echo -e "\n${RED}Error: ${1}\nDone: The installation has been terminated.${NC}"
+  fi
   exit 1
 }
 
@@ -65,10 +69,8 @@ function create_user() {
     useradd -m $USER && pok || perr
     # TODO: move to another function
     echo -en "${ST} Setting up the user account ...                                       "
-    su - $USER -c "cd - >/dev/null 2>&1" || perr
-    su - $USER -c "mkdir $CONFIGFOLDER >/dev/null 2>&1" || perr	 
-    su - $USER -c "touch $CONFIGFOLDER/$CONFIG_FILE >/dev/null 2>&1" || perr
-	  echo "$USER	ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers || perr
+    su - $USER -c "mkdir ~/${CONFIGFOLDER} >/dev/null 2>&1" || perr	"Failed to create datadir: ~/${CONFIGFOLDER}"
+    su - $USER -c "touch ~/${CONFIGFOLDER}/${CONFIG_FILE} >/dev/null 2>&1" || perr "Failed to create config file: ~/${CONFIGFOLDER}/${CONFIG_FILE}"
     pok
   fi
 }
