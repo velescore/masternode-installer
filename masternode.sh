@@ -126,9 +126,10 @@ EOF
 }
 
 function create_key() {
-  if [ $1 == '--nonint' ]; then # skip reading in non-interactive mode
+  if ! [ -z "$1" ] && [ "$1" == '--nonint' ]; then # skip reading in non-interactive mode
     echo "[non interactive mode] Generating new masternode private key ..."
   else
+    echo $@
     echo -e "Enter your ${RED}$COIN_NAME Masternode Private Key${NC}. Leave it blank to generate a new ${RED}Masternode Private Key${NC} for you:"
     read -e COINKEY
   fi
