@@ -66,10 +66,10 @@ function create_user() {
   if id "$USER" >/dev/null 2>&1; then
     echo -e "\n{$BRED} !   ${YELLOW}Warning: User account ${BLUE}${USER}${NC} already exists."                       
   else
-    echo -en "${ST}   Creating new user account ${BLUE}${USER}${NC} ...                                   "
+    echo -en "${ST}   Creating new user account ${BLUE}${USER}${NC} ...                                 "
     useradd -m $USER && pok || perr
     # TODO: move to another function
-    echo -en "${ST}   Creating new datadir ...                                              "
+    echo -en "${ST}   Creating new datadir ...                                            "
     su - $USER -c "mkdir ${CONFIGFOLDER} >/dev/null 2>&1" || perr	"Failed to create datadir: ${CONFIGFOLDER}"
     su - $USER -c "touch ${CONFIGFOLDER}/${CONFIG_FILE} >/dev/null 2>&1" || perr "Failed to create config file: ${CONFIGFOLDER}/${CONFIG_FILE}"
     pok
