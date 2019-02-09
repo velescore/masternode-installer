@@ -127,7 +127,9 @@ EOF
 
 function create_key() {
   echo -e "Enter your ${RED}$COIN_NAME Masternode Private Key${NC}. Leave it blank to generate a new ${RED}Masternode Private Key${NC} for you:"
-  read -e COINKEY
+  if [ $0 != '--nonint' ]; then # skip reading in non-interactive mode
+    read -e COINKEY
+  fi
   if [[ -z "$COINKEY" ]]; then
   $COIN_PATH$COIN_DAEMON -daemon
   sleep 30
