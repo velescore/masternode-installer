@@ -1,2 +1,4 @@
+os: linux
+dist: xenial
 language: bash
 script: make test
