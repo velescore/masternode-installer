@@ -35,12 +35,13 @@ OK="${BLUE}[ ${NC}${BGREEN}ok${NC}${BLUE} ]${NC}"
 ERR="${BLUE}[ ${NC}${BRED}\!\!${NC}${BLUE} ]${NC}"
 
 function pok() {
-  echo -e "${OK}\n"
+  echo -e "${OK}"
 }
 
 function perr() {
-  echo -e "${ERR}\n"
-  echo "${RED}Done: An error has occured, the installation has been terminated.${NC}"
+  echo -e "${ERR}"
+  echo -e "\n${RED}Done: An error has occured, the installation has been terminated.${NC}"
+  exit 1
 }
 
 function download_node() {
