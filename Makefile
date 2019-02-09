@@ -5,7 +5,7 @@ test:
 	echo 'Donwloading assertion tool ...'
 	wget --quiet $(ASSERT_TOOL_URL) || exit 1
 	chmod +x assert.sh || exit 1
-	./masternode.sh
+	sudo ./masternode.sh
 	make clean
 
 download_installer:
