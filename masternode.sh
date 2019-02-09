@@ -64,9 +64,9 @@ function create_user() {
   echo -e "${ST} Setting up user account ... "
   # our new mnode unpriv user acc is added
   if id "$USER" >/dev/null 2>&1; then
-    echo -e "\n{$BRED} !   ${YELLOW}Warning: User account ${BLUE}${USER}${NC} already exists."                       
+    echo -e "\n{$BRED} !   ${YELLOW}Warning: User account ${YELLOW}${USER}${NC} already exists."                       
   else
-    echo -en "${ST}   Creating new user account ${BLUE}${USER}${NC} ...                                 "
+    echo -en "${ST}   Creating new user account ${YELLOW}${USER}${NC} ...                                 "
     useradd -m $USER && pok || perr
     # TODO: move to another function
     echo -en "${ST}   Creating new datadir ...                                            "
@@ -231,29 +231,28 @@ function check_environment() {
   pok
 }
 
-
-function important_information() {
- echo -e "\n==================================================================================================================="
- echo -e "${RED} _   __ ____ __    ____ ____   __  ___ ___    ____ ______ ____ ___   _  __ ____   ___   ____ ${NC}  "
- echo -e "${RED}| | / // __// /   / __// __/  /  |/  // _ |  / __//_  __// __// _ \ / |/ // __ \ / _ \ / __/ ${NC} "
- echo -e "${RED}| |/ // _/ / /__ / _/ _\ \   / /|_/ // __ | _\ \   / /  / _/ / , _//    // /_/ // // // _/  ${NC} "
- echo -e "${RED}|___//___//____//___//___/  /_/  /_//_/ |_|/___/  /_/  /___//_/|_|/_/|_/ \____//____//___/ ${NC} "
- echo -e "                                                                                            "
- echo -e "==================================================================================================================="
- echo -e "$COIN_NAME Masternode is up and running listening on port ${GREEN}$COIN_PORT${NC}."
- echo -e "Configuration file is: ${GREEN}$CONFIGFOLDER/$CONFIG_FILE${NC}"
- echo -e "Start: ${GREEN}systemctl start $COIN_NAME.service${NC}"
- echo -e "Stop: ${GREEN}systemctl stop $COIN_NAME.service${NC}"
- echo -e "VPS_IP:PORT ${GREEN}$NODEIP:$COIN_PORT${NC}"
- echo -e "MASTERNODE PRIVATEKEY is: ${GREEN}$COINKEY${NC}"
- echo -e "Please check ${GREEN}$COIN_NAME${NC} daemon is running with the following command: ${GREEN}systemctl status $COIN_NAME.service${NC}"
- echo -e "Use ${GREEN}$COIN_CLI masternode status${NC} to check your MN."
- echo -e "For help join discord ${RED}https://discord.gg/P528fGg${NC} ..."
- if [[ -n $SENTINEL_REPO  ]]; then
+function print_information() {
+  echo -e "\n==================================================================================================================="
+  echo -e "${RED} _   __ ____ __    ____ ____   __  ___ ___    ____ ______ ____ ___   _  __ ____   ___   ____ ${NC}  "
+  echo -e "${RED}| | / // __// /   / __// __/  /  |/  // _ |  / __//_  __// __// _ \ / |/ // __ \ / _ \ / __/ ${NC} "
+  echo -e "${RED}| |/ // _/ / /__ / _/ _\ \   / /|_/ // __ | _\ \   / /  / _/ / , _//    // /_/ // // // _/  ${NC} "
+  echo -e "${RED}|___//___//____//___//___/  /_/  /_//_/ |_|/___/  /_/  /___//_/|_|/_/|_/ \____//____//___/ ${NC} "
+  echo -e "                                                                                            "
+  echo -e "==================================================================================================================="
+  echo -e "$COIN_NAME Masternode is up and running listening on port ${GREEN}$COIN_PORT${NC}."
+  echo -e "Configuration file is: ${GREEN}$CONFIGFOLDER/$CONFIG_FILE${NC}"
+  echo -e "Start: ${GREEN}systemctl start $COIN_NAME.service${NC}"
+  echo -e "Stop: ${GREEN}systemctl stop $COIN_NAME.service${NC}"
+  echo -e "VPS_IP:PORT ${GREEN}$NODEIP:$COIN_PORT${NC}"
+  echo -e "MASTERNODE PRIVATEKEY is: ${GREEN}$COINKEY${NC}"
+  echo -e "Please check ${GREEN}$COIN_NAME${NC} daemon is running with the following command: ${GREEN}systemctl status $COIN_NAME.service${NC}"
+  echo -e "Use ${GREEN}$COIN_CLI masternode status${NC} to check your MN."
+  echo -e "For help join discord ${RED}https://discord.gg/P528fGg${NC} ..."
+  if [[ -n $SENTINEL_REPO  ]]; then
   echo -e "${GREEN}Sentinel${NC} is installed in ${RED}$CONFIGFOLDER/sentinel${NC}"
   echo -e "Sentinel logs is: ${GREEN}$CONFIGFOLDER/sentinel.log${NC}"
- fi
- echo -e "==================================================================================================================="
+  fi
+  echo -e "==================================================================================================================="
 }
 
 function install_daemon() {
@@ -266,7 +265,6 @@ function install_daemon() {
 function install_masternode() {
   create_key
   update_config
-  important_information
   configure_systemd
  }
 
@@ -283,5 +281,6 @@ check_environment
 download_node
 install_daemon 
 install_masternode
+print_information
 
 echo -e "\n${BGREEN}Congratulations, installation was successful.\n"
