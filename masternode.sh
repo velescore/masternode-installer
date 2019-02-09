@@ -1,10 +1,11 @@
 #!/bin/bash
-# version 	v0.1
-# date    	2018-11-27
-# Function:	Installation of an Veles masternode
-# discord: 	Mdfkbtc#8759
+# version 	v0.1.02
+# date    	2019-02-09
+# description:	Installation of an Veles masternode
 # website:      https://veles.network
 # twitter:      https://twitter.com/mdfkbtc
+# author:  Veles Core developers
+# licence: GNU/GPL 
 ##########################################################
 
 TMP_FOLDER=$(mktemp -d)
@@ -26,9 +27,11 @@ NODEIP=$(curl -s4 api.ipify.org)
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
+YELLOW='\033[0;33m'
 BRED='\033[1;31m'
 BGREEN='\033[1;32m'
 BBLUE='\033[1;34m'
+BYELLOW='\033[1;33m'
 NC='\033[0m'
 ST="${BGREEN} * ${NC}"
 OK="${BLUE}[ ${NC}${BGREEN}ok${NC}${BLUE} ]${NC}"
@@ -49,14 +52,12 @@ function perr() {
 }
 
 function download_node() {
-  echo -e "Preparing to download ${GREEN}$COIN_NAME${NC}."
-  cd $TMP_FOLDER >/dev/null 2>&1
-  wget -q $COIN_TGZ
-  compile_error
-  tar xvzf $COIN_ZIP -C $COIN_PATH >/dev/null 2>&1
-  cd - >/dev/null 2>&1
-  rm -rf $TMP_FOLDER >/dev/null 2>&1
-  clear
+  echo -en "${ST} Downloading an installation archive ...                               "
+  cd $TMP_FOLDER >/dev/null 2>&1 || perr "Cannot change to the temporary directory: $TMP_FOLDER"
+  wget -q $COIN_TGZ || perr "Failed to download installation archive"
+  tar xvzf $COIN_ZIP -C $COIN_PATH >/dev/null 2>&1 || "Failed to extract installation archive $COIN_ZIP to $COIN_PATH"
+  pok
+  rm -rf $TMP_FOLDER >/dev/null 2>&1 || echo -e "\n{$BRED} !   ${YELLOW}Warning: Failed to remove temporary directory: ${TMP_FOLDER}${NC}\n"
 }
 
 function create_user() {
@@ -76,25 +77,24 @@ function create_user() {
 }
 
 function check_ufw() {
-  #check if is installed ufw if yes setup
+  echo -en "${ST} Checking whether UFW firewall is present ...                          "
   if [ -f "/sbin/ufw" ] && ufw status | grep -wq 'active'; then 
-    echo "Ufw is active and will be set";
     setup_ufw
   fi
 }
 
 function setup_ufw() {
-  #will setup ufw
-  echo -e "Installing and setting up firewall to allow ingress on port ${GREEN}$COIN_PORT${NC}"
-  ufw allow $COIN_PORT/tcp comment "$COIN_NAME MN port" >/dev/null 2>&1
-  ufw allow ssh comment "SSH" >/dev/null 2>&1
-  ufw limit ssh/tcp >/dev/null 2>&1
-  ufw default allow outgoing >/dev/null 2>&1
-  echo "Ufw is configured" | ufw enable >/dev/null 2>&1
+  echo -en "${ST}   Enabling inbound traffic on TCP port ${BYELLOW}${COIN_PORT}${NC} ...                      "
+  ufw allow $COIN_PORT/tcp comment "$COIN_NAME MN port" >/dev/null 2>&1 || perr "Failed to set-up UFW (ufw allow $COIN_PORT/tcp)"
+  ufw allow ssh comment "SSH" >/dev/null 2>&1 || perr "Failed to set-up UFW (ufw allow $COIN_PORT/tcp)"
+  ufw limit ssh/tcp >/dev/null 2>&1 || perr "Failed to set-up UFW (ufw allow $COIN_PORT/tcp)"
+  ufw default allow outgoing >/dev/null 2>&1 || perr "Failed to set-up UFW (ufw allow $COIN_PORT/tcp)"
+  ufw enable >/dev/null 2>&1 || perr "Failed to set-up UFW (ufw allow $COIN_PORT/tcp)"
+  pok
 }
  
 function configure_systemd() {
-  echo -en "${ST} Creating systemd service ...                                          "
+  echo -en "${ST} Creating systemd service ${BYELLOW}${COIN_NAME}${NC} ...                                    "
   cat << EOF > /etc/systemd/system/$COIN_NAME.service && pok || perr
 [Unit]
 Description=$COIN_NAME service
@@ -135,9 +135,10 @@ EOF
 
 
 function create_config() {
+  echo -en "${ST} Generating configuration file ...                                     "
   RPCUSER=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w10 | head -n1)
   RPCPASSWORD=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w22 | head -n1)
-  cat << EOF > $CONFIGFOLDER/$CONFIG_FILE
+  cat << EOF > $CONFIGFOLDER/$CONFIG_FILE && pok || perr "Failed to write configuration to: $CONFIGFOLDER/$CONFIG_FILE"
 rpcuser=$RPCUSER
 rpcpassword=$RPCPASSWORD
 rpcport=$RPC_PORT
@@ -150,18 +151,17 @@ EOF
 }
 
 function create_key() {
-  if [ $ARG1 == '--nonint' ]; then # skip reading in non-interactive mode
-    echo "[non interactive mode] Generating new masternode private key ..."
-  else
+  
+  if ! [ $ARG1 == '--nonint' ]; then # skip reading in non-interactive mode
     echo -e "Enter your ${RED}$COIN_NAME Masternode Private Key${NC}. Leave it blank to generate a new ${RED}Masternode Private Key${NC} for you:"
     read -e COINKEY
   fi
   if [[ -z "$COINKEY" ]]; then
+    echo -en "${ST} Generating masternode private key ...                                 "
     $COIN_PATH$COIN_DAEMON -daemon
     sleep 30
     if [ -z "$(ps axo cmd:100 | grep $COIN_DAEMON)" ]; then
-      echo -e "${RED}$COIN_NAME server couldn not start. Check /var/log/syslog for errors.${NC}"
-      exit 1
+      perr "${RED}$COIN_NAME server couldn not start. Check /var/log/syslog for errors.${NC}"
     fi
     COINKEY=$($COIN_PATH$COIN_CLI masternode genkey)
     if [ "$?" -gt "0" ];then
@@ -171,13 +171,14 @@ function create_key() {
     fi
     $COIN_PATH$COIN_CLI stop
   fi
-  clear
+  pok
 }
 
 function update_config() {
+  echo -en "${ST} Updating configuration file ...                                       "
   sed -i 's/daemon=1/daemon=0/' $CONFIGFOLDER/$CONFIG_FILE
-  cat << EOF >> $CONFIGFOLDER/$CONFIG_FILE
-## Config generated by Veles Core script masternode.sh v0.1.01
+  cat << EOF >> $CONFIGFOLDER/$CONFIG_FILE && pok || perr "Failed to update config file: $CONFIGFOLDER/$CONFIG_FILE"
+## Config generated by Veles Core script masternode.sh v0.1.02
 logintimestamps=1
 maxconnections=256
 txindex=1
@@ -197,9 +198,11 @@ function get_ip() {
     NODE_IPS+=($(curl --interface $ips --connect-timeout 2 -s4 api.ipify.org))
   done
 
-  if [ ${#NODE_IPS[@]} -gt 1 ]
-    then
-      echo -e "${GREEN}More than one IP. Please type 0 to use the first IP, 1 for the second and so on...${NC}"
+  if [ ${#NODE_IPS[@]} -gt 1 ]; then
+    if [ $ARG1 == '--nonint' ]; then
+      echo -e "\n{$BRED} !   ${YELLOW}Warning: More than one IPv4 detected but running in non-interactive mode, using the first one ...${NC}\n"
+    else
+      echo -e "${GREEN}More than one IPv4 detected. Please type 0 to use the first IP, 1 for the second and so on...${NC}"
       INDEX=0
       for ip in "${NODE_IPS[@]}"
       do
@@ -208,26 +211,18 @@ function get_ip() {
       done
       read -e choose_ip
       NODEIP=${NODE_IPS[$choose_ip]}
+    fi
   else
     NODEIP=${NODE_IPS[0]}
   fi
 }
 
-
-function compile_error() {
-if [ "$?" -gt "0" ];
- then
-  echo -e "${RED}Failed to compile $COIN_NAME. Please investigate.${NC}"
-  exit 1
-fi
-}
-
-
 function checks() {
-if [ -n "$(pidof $COIN_DAEMON)" ] || [ -e "$COIN_DAEMOM" ] ; then
-  echo -e "${RED}$COIN_NAME is already installed.${NC}"
-  exit 1
-fi
+  echo -en "${ST} Checking the installation environment ...                             "
+  if [ -n "$(pidof $COIN_DAEMON)" ] || [ -e "$COIN_DAEMOM" ] ; then
+    perr "${RED}$COIN_NAME is already installed.${NC}"
+  fi
+  pok
 }
 
 
@@ -278,7 +273,6 @@ fi
 
 echo "Checking system..."
 checks
-echo "Downlading node ..."
 download_node
 echo "Setting up node ..."
 setup_node 
