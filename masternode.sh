@@ -61,15 +61,15 @@ function download_node() {
 }
 
 function create_user() {
-  echo -e "${ST} Setting up new user for masternode ..."
+  echo -e "${ST} Setting up user account ... "
   # our new mnode unpriv user acc is added
   if id "$USER" >/dev/null 2>&1; then
-    echo -e "${ST} User account ${BLUE}${USER}${NC} already exists.                                    ${OK}"                       
+    echo -e "\n{$BRED} !   ${YELLOW}Warning: User account ${BLUE}${USER}${NC} already exists."                       
   else
-    echo -en "${ST} Creating new user account ${BLUE}${USER}${NC} ...                                   "
+    echo -en "${ST}   Creating new user account ${BLUE}${USER}${NC} ...                                   "
     useradd -m $USER && pok || perr
     # TODO: move to another function
-    echo -en "${ST} Setting up the user account ...                                       "
+    echo -en "${ST}   Creating new datadir ...                                              "
     su - $USER -c "mkdir ${CONFIGFOLDER} >/dev/null 2>&1" || perr	"Failed to create datadir: ${CONFIGFOLDER}"
     su - $USER -c "touch ${CONFIGFOLDER}/${CONFIG_FILE} >/dev/null 2>&1" || perr "Failed to create config file: ${CONFIGFOLDER}/${CONFIG_FILE}"
     pok
@@ -77,12 +77,12 @@ function create_user() {
 }
 
 function check_ufw() {
-  echo -en "${ST} Checking whether UFW firewall is present ...                          "
+  echo -en "${ST} Checking whether UFW firewall is present ... "
   if [ -f "/sbin/ufw" ] && ufw status | grep -wq 'active'; then 
-    pok
+    echo "yes"
     setup_ufw
   else
-    echo "[ no ]"
+    echo "no"
   fi
 }
 
@@ -164,7 +164,7 @@ function create_key() {
   fi
   if [[ -z "$COINKEY" ]]; then
     echo -en "${ST} Generating masternode private key ...                                 "
-    $COIN_PATH$COIN_DAEMON -daemon
+    $COIN_PATH$COIN_DAEMON -daemon >/dev/null 2>&1
     sleep 30
     if [ -z "$(ps axo cmd:100 | grep $COIN_DAEMON)" ]; then
       perr "${RED}$COIN_NAME server couldn not start. Check /var/log/syslog for errors.${NC}"
@@ -175,7 +175,7 @@ function create_key() {
       sleep 30
       COINKEY=$($COIN_PATH$COIN_CLI masternode genkey)
     fi
-    $COIN_PATH$COIN_CLI stop
+    $COIN_PATH$COIN_CLI stop >/dev/null 2>&1
   fi
   pok
 }
@@ -233,7 +233,7 @@ function check_environment() {
 
 
 function important_information() {
- echo -e "==================================================================================================================="
+ echo -e "\n==================================================================================================================="
  echo -e "${RED} _   __ ____ __    ____ ____   __  ___ ___    ____ ______ ____ ___   _  __ ____   ___   ____ ${NC}  "
  echo -e "${RED}| | / // __// /   / __// __/  /  |/  // _ |  / __//_  __// __// _ \ / |/ // __ \ / _ \ / __/ ${NC} "
  echo -e "${RED}| |/ // _/ / /__ / _/ _\ \   / /|_/ // __ | _\ \   / /  / _/ / , _//    // /_/ // // // _/  ${NC} "
@@ -284,4 +284,4 @@ download_node
 install_daemon 
 install_masternode
 
-echo -e "\n${GREEN} *** Congratulations, installation was successful! ***{$NC}\n"
+echo -e "\n${BGREEN}Congratulations, installation was successful.\n"
