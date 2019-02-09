@@ -6,7 +6,7 @@ test:
 	@echo '[test] Running the script ...'
 	sudo ./masternode.sh --nonint
 	@echo '[test] Done: Script has finished.'
-	make clean
+	@make clean
 
 prepare:
 	@echo '[test] Preparing the tests ...'
@@ -15,4 +15,4 @@ prepare:
 
 clean:
 	echo "[test] Cleaning up ..."
-	rm assert.sh
+	@rm assert.sh
