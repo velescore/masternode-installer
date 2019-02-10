@@ -54,7 +54,7 @@ function perr() {
 }
 
 function check_installation() {
-  echo -en "${ST} Checking whether ${COIN_NAME} is already installed ... "
+  echo -en "\n${ST} Checking whether ${COIN_NAME} is already installed ... "
   if [ -n "$(pidof $COIN_DAEMON)" ] || [ -e "${INSTALL_PATH}/${COIN_DAEMON}" ] ; then
     echo "yes"
     start_update
@@ -321,7 +321,7 @@ function install_masternode() {
  }
 
 function start_installation() {
-  echo -e "\n${ST} Starting ${COIN_NAME} installation..."
+  echo -e "${ST} Starting ${COIN_NAME} installation..."
   download_and_copy
   configure_daemon 
   install_masternode
@@ -330,7 +330,7 @@ function start_installation() {
 }
 
 function start_update() {
-  echo -e "\n${ST} Starting ${COIN_NAME} update ..."
+  echo -e "${ST} Starting ${COIN_NAME} update ..."
   stop_service
   download_and_copy
   disable_reindex_next_start
