@@ -80,16 +80,16 @@ function download_and_copy() {
   wget -q $COIN_TGZ_URL || perr "Failed to download installation archive"
   archive_name=$(echo $COIN_TGZ_URL | awk -F'/' '{print $NF}')
   # Remove if destination files already exist
-  if [ -e "${INSTALL_PATH}/${COIN_DAEMON}"]; then
+  if [ -e "${INSTALL_PATH}/${COIN_DAEMON}" ]; then
     rm "${INSTALL_PATH}/${COIN_DAEMON}" || perr "Failed to remove old version of ${COIN_DAEMON}"
   fi
-  if [ -e "${INSTALL_PATH}/${COIN_CLI}"]; then
+  if [ -e "${INSTALL_PATH}/${COIN_CLI}" ]; then
     rm "${INSTALL_PATH}/${COIN_CLI}" || perr "Failed to remove old version of ${COIN_CLI}"
   fi
-  if [ -e "${INSTALL_PATH}/${COIN_NAME}-qt"]; then
+  if [ -e "${INSTALL_PATH}/${COIN_NAME}-qt" ]; then
     rm "${INSTALL_PATH}/${COIN_NAME}-qt" || perr "Failed to remove old version of ${COIN_NAME}-qt"
   fi
-  if [ -e "${INSTALL_PATH}/${COIN_NAME}-tx"]; then 
+  if [ -e "${INSTALL_PATH}/${COIN_NAME}-tx" ]; then 
     rm "${INSTALL_PATH}/${COIN_NAME}-tx" || perr "Failed to remove old version of ${COIN_NAME}-tx"
   fi
   # Extract executables to the installation directory
