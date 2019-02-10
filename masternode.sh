@@ -35,7 +35,7 @@ BGREEN='\033[1;32m'
 BBLUE='\033[1;34m'
 BYELLOW='\033[1;33m'
 NC='\033[0m'
-ST="${BGREEN} * ${NC}"
+ST="${BGREEN} *${NC}"
 OK="${BLUE}[ ${NC}${BGREEN}ok${NC}${BLUE} ]${NC}"
 ERR="${BLUE}[ ${NC}${BRED}"'!!'"${NC}${BLUE} ]${NC}"
 

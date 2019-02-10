@@ -7,11 +7,11 @@ test:
 	@echo '[test] Running the script [install mode] ...'
 	sudo ./masternode.sh --nonint
 	@echo '[test] Done: Installation finished, checking whether daemon is running ...'
-	@ps aux | grep velesd || exit 1
+	@ps aux | grep -v grep | grep velesd || exit 1
 	@echo '[test] Running the script [update mode] ...'
 	sudo ./masternode.sh --nonint
 	@echo '[test] Done: Update finished, checking whether daemon is running ...'
-	@ps aux | grep velesd || exit 1
+	@ps aux | grep -v grep | grep velesd || exit 1
 	@make clean
 
 prepare:
@@ -21,4 +21,4 @@ prepare:
 
 clean:
 	echo "[test] Cleaning up ..."
-	@grm assert.sh
+	@rm assert.sh
