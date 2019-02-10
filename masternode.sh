@@ -133,8 +133,8 @@ EOF
 }
 
 function start_systemd_service() {
-  echo -en "${ST} Starting ${BYELLOW}${COIN_NAME_SHORT}${NC} service ...                                            "
-  systemctl start $COIN_NAME_SHORT.service && $(sleep 1 ; pok) || perr "Failed to start systemd service ${COIN_NAME_SHORT}.service"
+  echo -en "${ST} Starting ${BYELLOW}${COIN_NAME_SHORT}${NC} service ...                                            ";
+  systemctl start ${COIN_NAME_SHORT}.service && $(sleep 1 ; pok) || perr "Failed to start systemd service ${COIN_NAME_SHORT}.service"
 
   if [[ -z "$(ps axo cmd:100 | egrep $COIN_DAEMON)" ]]; then
     echo -e "${RED}$COIN_NAME_SHORT is not running${NC}, please investigate. You should start by running the following commands as root:"
