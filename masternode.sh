@@ -321,20 +321,23 @@ function install_masternode() {
  }
 
 function start_installation() {
-  echo -e "${ST} Starting ${COIN_NAME} installation..."
+  echo -e "\n${ST} Starting ${COIN_NAME} installation..."
   download_and_copy
   configure_daemon 
   install_masternode
   print_success_screen
+  echo -e "\n${BGREEN}Congratulations, ${COIN_NAME} installation was successful.\n"
 }
 
 function start_update() {
-  echo -e "${ST} Starting ${COIN_NAME} update ..."
+  echo -e "\n${ST} Starting ${COIN_NAME} update ..."
   stop_service
   download_and_copy
   disable_reindex_next_start
   enable_reindex_next_start
+  start_service
   disable_reindex_next_start
+  echo -e "\n${BGREEN}Congratulations, ${COIN_NAME} update was successful.\n"
 }
 
 
@@ -347,5 +350,3 @@ else
 fi
 
 check_installation
-
-echo -e "\n${BGREEN}Congratulations, installation was successful.\n"
