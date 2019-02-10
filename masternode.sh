@@ -78,7 +78,7 @@ function download_node() {
   
   archive_name=$(echo $COIN_TGZ_URL | awk -F'/' '{print $NF}')
 
-  tar xvzf $archive_name -C ${$INSTALL_PATH}/ >/dev/null 2>&1 || "Failed to extract installation archive $archive_name to ${$INSTALL_PATH}"
+  tar xvzf $archive_name -C ${INSTALL_PATH}/ >/dev/null 2>&1 || "Failed to extract installation archive $archive_name to ${INSTALL_PATH}"
   pok
   rm -rf $TEMP_PATH >/dev/null 2>&1 || echo -e "\n{$BRED} !   ${YELLOW}Warning: Failed to remove temporary directory: ${TEMP_PATH}${NC}\n"
 }
@@ -120,8 +120,8 @@ User=$USER
 Group=$USER
 Type=forking
 #PIDFile=$DATADIR_PATH/${COIN_NAME_SHORT}.pid
-ExecStart=${$INSTALL_PATH}/$COIN_DAEMON -daemon -conf=$DATADIR_PATH/$CONFIG_FILENAME -datadir=$DATADIR_PATH
-ExecStop=-${$INSTALL_PATH}/${COIN_CLI} -conf=$DATADIR_PATH/$CONFIG_FILENAME -datadir=$DATADIR_PATH stop
+ExecStart=${INSTALL_PATH}/$COIN_DAEMON -daemon -conf=$DATADIR_PATH/$CONFIG_FILENAME -datadir=$DATADIR_PATH
+ExecStop=-${INSTALL_PATH}/${COIN_CLI} -conf=$DATADIR_PATH/$CONFIG_FILENAME -datadir=$DATADIR_PATH stop
 Restart=always
 PrivateTmp=true
 TimeoutStopSec=60s
@@ -177,18 +177,18 @@ function create_key() {
   fi
   if [[ -z "$COINKEY" ]]; then
     echo -en "${ST} Generating masternode private key ...                                 "
-    ${$INSTALL_PATH}/$COIN_DAEMON -daemon >/dev/null 2>&1
+    ${INSTALL_PATH}/$COIN_DAEMON -daemon >/dev/null 2>&1
     sleep 30
     if [ -z "$(ps axo cmd:100 | grep $COIN_DAEMON)" ]; then
       perr "${RED}${COIN_NAME_SHORT} server couldn not start. Check /var/log/syslog for errors.${NC}"
     fi
-    COINKEY=$(${$INSTALL_PATH}/${COIN_CLI} masternode genkey)
+    COINKEY=$(${INSTALL_PATH}/${COIN_CLI} masternode genkey)
     if [ "$?" -gt "0" ];then
       echo -e "${RED}Wallet not fully loaded. Let us wait and try again to generate the Private Key${NC}"
       sleep 30
-      COINKEY=$(${$INSTALL_PATH}/${COIN_CLI} masternode genkey)
+      COINKEY=$(${INSTALL_PATH}/${COIN_CLI} masternode genkey)
     fi
-    ${$INSTALL_PATH}/${COIN_CLI} stop >/dev/null 2>&1
+    ${INSTALL_PATH}/${COIN_CLI} stop >/dev/null 2>&1
   fi
   pok
 }
@@ -238,12 +238,12 @@ function get_ip() {
 
 function print_installed_version() {
   echo -en "${BGREEN}"
-  ${$INSTALL_PATH}/${COIN_CLI} -version | head -n 1
+  ${INSTALL_PATH}/${COIN_CLI} -version | head -n 1
   echo -en "${NC}"
 }
 
 function print_logo() {
-  ${$INSTALL_PATH}/${COIN_CLI} -version | head -n 6 | tail -n 5   # Current Veles Core ASCII logo
+  ${INSTALL_PATH}/${COIN_CLI} -version | head -n 6 | tail -n 5   # Current Veles Core ASCII logo
   echo -e "     __  ___ ___   ____ ______ ____ ___   _  __ ____   ___   ____"
   echo -e "    /  |/  // _ | / __//_  __// __// _ \ / |/ // __ \ / _ \ / __/"
   echo -e "   / /|_/ // __ |_\ \   / /  / _/ / , _//    // /_/ // // // _/  "
