@@ -57,10 +57,10 @@ function check_installation() {
   echo -en "${ST} Checking whether ${COIN_NAME} is already installed ... "
   if [ -n "$(pidof $COIN_DAEMON)" ] || [ -e "${INSTALL_PATH}/${COIN_DAEMON}" ] ; then
     echo "yes"
-    start_installation
+    start_update
   else
     echo "no"
-    start_update
+    start_installation
   fi
 }
 
