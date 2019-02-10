@@ -185,7 +185,7 @@ function enable_reindex_next_start() {
 
 function disable_reindex_next_start() {
   sed -i.bak "s/-daemon -reindex -conf/-daemon -conf/g" "/etc/systemd/system/${COIN_NAME_SHORT}.service" || "Failed to update systemd service configuration"
-  systemctl daemon-reload && pok || "Failed to reload systemd daemon"
+  systemctl daemon-reload || "Failed to reload systemd daemon"
 }
 
 
@@ -333,7 +333,6 @@ function start_update() {
   echo -e "${ST} Starting ${COIN_NAME} update ..."
   stop_service
   download_and_copy
-  disable_reindex_next_start
   enable_reindex_next_start
   start_service
   disable_reindex_next_start
