@@ -102,7 +102,7 @@ function create_user() {
   echo -e "${ST}   Setting up user account ... "
   # our new mnode unpriv user acc is added
   if id "$USER" >/dev/null 2>&1; then
-    echo -e "\n{$BRED} !   ${BYELLOW}Warning: User account ${YELLOW}${USER}${NC} already exists."                       
+    echo -e "\n{$BRED} !   ${BYELLOW}Warning: User account ${BYELLOW}${USER}${NC} already exists."                       
   else
     echo -en "${ST}     Creating new user account ${YELLOW}${USER}${NC} ...                               "
     useradd -m $USER && pok || perr
