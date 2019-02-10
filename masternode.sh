@@ -337,6 +337,7 @@ function start_update() {
   enable_reindex_next_start
   start_service
   disable_reindex_next_start
+  print_success_screen
   echo -e "\n${BGREEN}Congratulations, ${COIN_NAME} update was successful.\n"
 }
 
