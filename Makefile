@@ -1,11 +1,17 @@
 ASSERT_TOOL_URL=https://raw.github.com/lehmannro/assert.sh/v1.1/assert.sh
 SCRIPT_URL=https://raw.githubusercontent.com/Velescore/veles-masternode-install/master/masternode.sh
+DAMEON_NAME=velesd
 
 test:
 	make prepare
-	@echo '[test] Running the script ...'
+	@echo '[test] Running the script [install mode] ...'
 	sudo ./masternode.sh --nonint
-	@echo '[test] Done: Script has finished.'
+	@echo '[test] Done: Installation finished, checking whether daemon is running ...'
+	@[ -n "$(pidof $(DAMEON_NAME))" ] || exit 1 
+	@echo '[test] Running the script [update mode] ...'
+	sudo ./masternode.sh --nonint
+	@echo '[test] Done: Update finished, checking whether daemon is running ...'
+	@[ -n "$(pidof $(DAMEON_NAME))" ] || exit 1
 	@make clean
 
 prepare:
@@ -15,4 +21,4 @@ prepare:
 
 clean:
 	echo "[test] Cleaning up ..."
-	@rm assert.sh
+	@grm assert.sh
