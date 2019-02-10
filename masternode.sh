@@ -238,21 +238,22 @@ function get_ip() {
 
 function print_installed_version() {
   echo -en "${BGREEN}"
-  ${INSTALL_PATH}/${COIN_CLI} -version | head -n 1
+  ${INSTALL_PATH}/${COIN_DAEMON} -version | head -n 1
   echo -en "${NC}"
 }
 
 function print_logo() {
+  echo -e "${YELLOW}"
   ${INSTALL_PATH}/${COIN_CLI} -version | head -n 6 | tail -n 5   # Current Veles Core ASCII logo
   echo -e "     __  ___ ___   ____ ______ ____ ___   _  __ ____   ___   ____"
   echo -e "    /  |/  // _ | / __//_  __// __// _ \ / |/ // __ \ / _ \ / __/"
   echo -e "   / /|_/ // __ |_\ \   / /  / _/ / , _//    // /_/ // // // _/  "
   echo -e "  /_/  /_//_/ |_|___/  /_/  /___//_/|_|/_/|_/ \____//____//___/  "
+  echo -e "${NC}"
 }
 
 function print_success_screen() {
   print_logo
-  echo -en "\n"
   print_installed_version
   echo -e "\n$COIN_NAME Masternode is up and running listening on port ${BYELLOW}$COIN_PORT${NC}."
   echo -e "Configuration file is: ${BYELLOW}$DATADIR_PATH/$CONFIG_FILENAME${NC}"
