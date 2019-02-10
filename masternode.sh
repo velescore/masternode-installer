@@ -254,20 +254,19 @@ function print_success_screen() {
   print_logo
   echo -en "\n"
   print_installed_version
-  echo -e "\n$COIN_NAME Masternode is up and running listening on port ${GREEN}$COIN_PORT${NC}."
-  echo -e "Configuration file is: ${GREEN}$DATADIR_PATH/$CONFIG_FILENAME${NC}"
-  echo -e "Start: ${GREEN}systemctl start ${COIN_NAME_SHORT}.service${NC}"
-  echo -e "Stop: ${GREEN}systemctl stop ${COIN_NAME_SHORT}.service${NC}"
-  echo -e "VPS_IP:PORT ${GREEN}$NODEIP:$COIN_PORT${NC}"
-  echo -e "MASTERNODE PRIVATEKEY is: ${GREEN}$COINKEY${NC}"
-  echo -e "Please check ${GREEN}${COIN_NAME_SHORT}${NC} daemon is running with the following command: ${GREEN}systemctl status ${COIN_NAME_SHORT}.service${NC}"
-  echo -e "Use ${GREEN}${COIN_CLI} masternode status${NC} to check your MN."
+  echo -e "\n$COIN_NAME Masternode is up and running listening on port ${BYELLOW}$COIN_PORT${NC}."
+  echo -e "Configuration file is: ${BYELLOW}$DATADIR_PATH/$CONFIG_FILENAME${NC}"
+  echo -e "Start: ${BYELLOW}systemctl start ${COIN_NAME_SHORT}.service${NC}"
+  echo -e "Stop: ${BYELLOW}systemctl stop ${COIN_NAME_SHORT}.service${NC}"
+  echo -e "VPS_IP:PORT ${BYELLOW}$NODEIP:$COIN_PORT${NC}"
+  echo -e "MASTERNODE PRIVATEKEY is: ${BYELLOW}$COINKEY${NC}"
+  echo -e "Please check ${BYELLOW}${COIN_NAME_SHORT}${NC} daemon is running with the following command: ${BYELLOW}systemctl status ${COIN_NAME_SHORT}.service${NC}"
+  echo -e "Use ${BYELLOW}${COIN_CLI} masternode status${NC} to check your MN."
   echo -e "For help join discord ${RED}https://discord.gg/P528fGg${NC} ..."
   if [[ -n $SENTINEL_REPO  ]]; then
-  echo -e "${GREEN}Sentinel${NC} is installed in ${RED}$DATADIR_PATH/sentinel${NC}"
-  echo -e "Sentinel logs is: ${GREEN}$DATADIR_PATH/sentinel.log${NC}"
+  echo -e "${BYELLOW}Sentinel${NC} is installed in ${RED}$DATADIR_PATH/sentinel${NC}"
+  echo -e "Sentinel logs is: ${BYELLOW}$DATADIR_PATH/sentinel.log${NC}"
   fi
-  echo -e "==================================================================================================================="
 }
 
 function install_daemon() {
