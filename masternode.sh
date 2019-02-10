@@ -179,13 +179,13 @@ function stop_service() {
 function enable_reindex_next_start() {
   # reindex after update
   echo -en "${ST}   Scheduling database reindex on next start ...                       "
-  sed -i.bak "s/-daemon -conf/-daemon -reindex -conf/g" "/etc/systemd/system/${COIN_NAME_SHORT}.service"
-  systemctl daemon-reload
+  sed -i.bak "s/-daemon -conf/-daemon -reindex -conf/g" "/etc/systemd/system/${COIN_NAME_SHORT}.service" || "Failed to update systemd service configuration"
+  systemctl daemon-reload && pok || "Failed to reload systemd daemon"
 }
 
 function disable_reindex_next_start() {
-  sed -i.bak "s/-daemon -reindex -conf/-daemon -conf/g" "/etc/systemd/system/${COIN_NAME_SHORT}.service"
-  systemctl daemon-reload
+  sed -i.bak "s/-daemon -reindex -conf/-daemon -conf/g" "/etc/systemd/system/${COIN_NAME_SHORT}.service" || "Failed to update systemd service configuration"
+  systemctl daemon-reload && pok || "Failed to reload systemd daemon"
 }
 
 
