@@ -8,22 +8,24 @@
 # licence: GNU/GPL 
 ##########################################################
 
-TMP_FOLDER=$(mktemp -d)
+# Configuration variables
+TEMP_PATH=$(mktemp -d)
 USER='veles'
-CONFIG_FILE='veles.conf'
-CONFIGFOLDER='/home/veles/.veles'
+CONFIG_FILENAME='veles.conf'
+DATADIR_PATH='/home/veles/.veles'
 COIN_DAEMON='velesd'
 COIN_CLI='veles-cli'
-COIN_PATH='/usr/local/bin/'
-COIN_TGZ='https://github.com/Velescore/Veles/releases/download/v0.17.0.21/velesLinux.tar.gz'
-COIN_ZIP=$(echo $COIN_TGZ | awk -F'/' '{print $NF}')
-COIN_NAME='veles'
+INSTALL_PATH='/usr/local/bin/'
+COIN_TGZ_URL='https://github.com/Velescore/Veles/releases/download/v0.17.0.21/velesLinux.tar.gz'
+COIN_NAME='Veles Core'
+COIN_NAME_SHORT='veles'
 COIN_PORT=21337
 RPC_PORT=21338
 
+# Autodetection
 NODEIP=$(curl -s4 api.ipify.org)
 
-
+# Constatnts
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -52,12 +54,15 @@ function perr() {
 }
 
 function download_node() {
-  echo -en "${ST} Downloading an installation archive ...                               "
-  cd $TMP_FOLDER >/dev/null 2>&1 || perr "Cannot change to the temporary directory: $TMP_FOLDER"
-  wget -q $COIN_TGZ || perr "Failed to download installation archive"
-  tar xvzf $COIN_ZIP -C $COIN_PATH >/dev/null 2>&1 || "Failed to extract installation archive $COIN_ZIP to $COIN_PATH"
+  echo -en "${ST} Downloading installation archive ...                                  "
+  cd $TEMP_PATH >/dev/null 2>&1 || perr "Cannot change to the temporary directory: $TEMP_PATH"
+  wget -q $COIN_TGZ_URL || perr "Failed to download installation archive"
+  
+  archive_name=$(echo $COIN_TGZ_URL | awk -F'/' '{print $NF}')
+
+  tar xvzf $archive_name -C $INSTALL_PATH >/dev/null 2>&1 || "Failed to extract installation archive $archive_name to $INSTALL_PATH"
   pok
-  rm -rf $TMP_FOLDER >/dev/null 2>&1 || echo -e "\n{$BRED} !   ${YELLOW}Warning: Failed to remove temporary directory: ${TMP_FOLDER}${NC}\n"
+  rm -rf $TEMP_PATH >/dev/null 2>&1 || echo -e "\n{$BRED} !   ${YELLOW}Warning: Failed to remove temporary directory: ${TEMP_PATH}${NC}\n"
 }
 
 function create_user() {
@@ -70,8 +75,8 @@ function create_user() {
     useradd -m $USER && pok || perr
     # TODO: move to another function
     echo -en "${ST}   Creating new datadir ...                                            "
-    su - $USER -c "mkdir ${CONFIGFOLDER} >/dev/null 2>&1" || perr	"Failed to create datadir: ${CONFIGFOLDER}"
-    su - $USER -c "touch ${CONFIGFOLDER}/${CONFIG_FILE} >/dev/null 2>&1" || perr "Failed to create config file: ${CONFIGFOLDER}/${CONFIG_FILE}"
+    su - $USER -c "mkdir ${DATADIR_PATH} >/dev/null 2>&1" || perr	"Failed to create datadir: ${DATADIR_PATH}"
+    su - $USER -c "touch ${DATADIR_PATH}/${CONFIG_FILENAME} >/dev/null 2>&1" || perr "Failed to create config file: ${DATADIR_PATH}/${CONFIG_FILENAME}"
     pok
   fi
 }
@@ -88,7 +93,7 @@ function check_ufw() {
 
 function setup_ufw() {
   echo -en "${ST}   Enabling inbound traffic on TCP port ${BYELLOW}${COIN_PORT}${NC} ...                      "
-  ufw allow $COIN_PORT/tcp comment "$COIN_NAME MN port" >/dev/null 2>&1 || perr "Failed to set-up UFW (ufw allow $COIN_PORT/tcp)"
+  ufw allow $COIN_PORT/tcp comment "$COIN_NAME_SHORT MN port" >/dev/null 2>&1 || perr "Failed to set-up UFW (ufw allow $COIN_PORT/tcp)"
   ufw allow ssh comment "SSH" >/dev/null 2>&1 || perr "Failed to set-up UFW (ufw allow $COIN_PORT/tcp)"
   ufw limit ssh/tcp >/dev/null 2>&1 || perr "Failed to set-up UFW (ufw allow $COIN_PORT/tcp)"
   ufw default allow outgoing >/dev/null 2>&1 || perr "Failed to set-up UFW (ufw allow $COIN_PORT/tcp)"
@@ -97,18 +102,18 @@ function setup_ufw() {
 }
  
 function configure_systemd() {
-  echo -en "${ST} Creating systemd service ${BYELLOW}${COIN_NAME}${NC} ...                                    "
-  cat << EOF > /etc/systemd/system/$COIN_NAME.service && pok || perr
+  echo -en "${ST} Creating systemd service ${BYELLOW}${COIN_NAME_SHORT}${NC} ...                                    "
+  cat << EOF > /etc/systemd/system/$COIN_NAME_SHORT.service && pok || perr
 [Unit]
-Description=$COIN_NAME service
+Description=$COIN_NAME_SHORT service
 After=network.target
 [Service]
 User=$USER
 Group=$USER
 Type=forking
-#PIDFile=$CONFIGFOLDER/$COIN_NAME.pid
-ExecStart=$COIN_PATH$COIN_DAEMON -daemon -conf=$CONFIGFOLDER/$CONFIG_FILE -datadir=$CONFIGFOLDER
-ExecStop=-$COIN_PATH$COIN_CLI -conf=$CONFIGFOLDER/$CONFIG_FILE -datadir=$CONFIGFOLDER stop
+#PIDFile=$DATADIR_PATH/$COIN_NAME_SHORT.pid
+ExecStart=$INSTALL_PATH$COIN_DAEMON -daemon -conf=$DATADIR_PATH/$CONFIG_FILENAME -datadir=$DATADIR_PATH
+ExecStop=-$INSTALL_PATH$COIN_CLI -conf=$DATADIR_PATH/$CONFIG_FILENAME -datadir=$DATADIR_PATH stop
 Restart=always
 PrivateTmp=true
 TimeoutStopSec=60s
@@ -121,20 +126,20 @@ EOF
   echo -en "${ST} Reloading systemctl ...                                               "
   systemctl daemon-reload && pok || perr "Failed to reload systemd daemon (systemctl daemon-reload)"
   echo -en "${ST} Setting up the service to auto-start on system boot ...               "
-  systemctl enable $COIN_NAME.service >/dev/null 2>&1 && pok || perr "Failed to enable systemd servie ${COIN_NAME}.service"
-  #u $USER;cd $CONFIGFOLDER
+  systemctl enable $COIN_NAME_SHORT.service >/dev/null 2>&1 && pok || perr "Failed to enable systemd servie ${COIN_NAME_SHORT}.service"
+  #u $USER;cd $DATADIR_PATH
   
 
 }
 
 function start_systemd_service() {
-  echo -en "${ST} Starting ${BYELLOW}${COIN_NAME}${NC} service ...                                            "
-  systemctl start $COIN_NAME.service && $(sleep 1 ; pok) || perr "Failed to start systemd service ${COIN_NAME}.service"
+  echo -en "${ST} Starting ${BYELLOW}${COIN_NAME_SHORT}${NC} service ...                                            "
+  systemctl start $COIN_NAME_SHORT.service && $(sleep 1 ; pok) || perr "Failed to start systemd service ${COIN_NAME_SHORT}.service"
 
   if [[ -z "$(ps axo cmd:100 | egrep $COIN_DAEMON)" ]]; then
-    echo -e "${RED}$COIN_NAME is not running${NC}, please investigate. You should start by running the following commands as root:"
-    echo -e "${GREEN}systemctl start${NC} $COIN_NAME.service"
-    echo -e "systemctl status $COIN_NAME.service"
+    echo -e "${RED}$COIN_NAME_SHORT is not running${NC}, please investigate. You should start by running the following commands as root:"
+    echo -e "${GREEN}systemctl start${NC} $COIN_NAME_SHORT.service"
+    echo -e "systemctl status $COIN_NAME_SHORT.service"
     echo -e "less /var/log/syslog${NC}"
     exit 1
   fi
@@ -144,7 +149,7 @@ function create_config() {
   echo -en "${ST} Generating configuration file ...                                     "
   RPCUSER=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w10 | head -n1)
   RPCPASSWORD=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w22 | head -n1)
-  cat << EOF > $CONFIGFOLDER/$CONFIG_FILE && pok || perr "Failed to write configuration to: $CONFIGFOLDER/$CONFIG_FILE"
+  cat << EOF > $DATADIR_PATH/$CONFIG_FILENAME && pok || perr "Failed to write configuration to: $DATADIR_PATH/$CONFIG_FILENAME"
 rpcuser=$RPCUSER
 rpcpassword=$RPCPASSWORD
 rpcport=$RPC_PORT
@@ -157,33 +162,32 @@ EOF
 }
 
 function create_key() {
-  
   if ! [ $ARG1 == '--nonint' ]; then # skip reading in non-interactive mode
-    echo -e "Enter your ${RED}$COIN_NAME Masternode Private Key${NC}. Leave it blank to generate a new ${RED}Masternode Private Key${NC} for you:"
+    echo -e "Enter your ${RED}$COIN_NAME_SHORT Masternode Private Key${NC}. Leave it blank to generate a new ${RED}Masternode Private Key${NC} for you:"
     read -e COINKEY
   fi
   if [[ -z "$COINKEY" ]]; then
     echo -en "${ST} Generating masternode private key ...                                 "
-    $COIN_PATH$COIN_DAEMON -daemon >/dev/null 2>&1
+    $INSTALL_PATH$COIN_DAEMON -daemon >/dev/null 2>&1
     sleep 30
     if [ -z "$(ps axo cmd:100 | grep $COIN_DAEMON)" ]; then
-      perr "${RED}$COIN_NAME server couldn not start. Check /var/log/syslog for errors.${NC}"
+      perr "${RED}$COIN_NAME_SHORT server couldn not start. Check /var/log/syslog for errors.${NC}"
     fi
-    COINKEY=$($COIN_PATH$COIN_CLI masternode genkey)
+    COINKEY=$($INSTALL_PATH$COIN_CLI masternode genkey)
     if [ "$?" -gt "0" ];then
       echo -e "${RED}Wallet not fully loaded. Let us wait and try again to generate the Private Key${NC}"
       sleep 30
-      COINKEY=$($COIN_PATH$COIN_CLI masternode genkey)
+      COINKEY=$($INSTALL_PATH$COIN_CLI masternode genkey)
     fi
-    $COIN_PATH$COIN_CLI stop >/dev/null 2>&1
+    $INSTALL_PATH$COIN_CLI stop >/dev/null 2>&1
   fi
   pok
 }
 
 function update_config() {
   echo -en "${ST} Updating configuration file ...                                       "
-  sed -i 's/daemon=1/daemon=0/' $CONFIGFOLDER/$CONFIG_FILE
-  cat << EOF >> $CONFIGFOLDER/$CONFIG_FILE && pok || perr "Failed to update config file: $CONFIGFOLDER/$CONFIG_FILE"
+  sed -i 's/daemon=1/daemon=0/' $DATADIR_PATH/$CONFIG_FILENAME
+  cat << EOF >> $DATADIR_PATH/$CONFIG_FILENAME && pok || perr "Failed to update config file: $DATADIR_PATH/$CONFIG_FILENAME"
 ## Config generated by Veles Core script masternode.sh v0.1.02
 logintimestamps=1
 maxconnections=256
@@ -223,33 +227,44 @@ function get_ip() {
   fi
 }
 
-function check_environment() {
-  echo -en "${ST} Checking the installation environment ...                             "
-  if [ -n "$(pidof $COIN_DAEMON)" ] || [ -e "$COIN_DAEMOM" ] ; then
-    perr "${RED}$COIN_NAME is already installed.${NC}"
+function check_system() {
+  echo -en "${ST} Looking for previous installation ...                                 "
+  if [ -n "$(pidof $COIN_DAEMON)" ] || [ -e "${INSTALL_PATH}${COIN_DAEMON}" ] ; then
+    perr "$COIN_NAME is already installed."
   fi
   pok
 }
 
-function print_information() {
-  echo -e "\n================================================================================"
-  echo -e "${RED} _   __ __  ____   __  ___ ___  ____ ______ ____ ___   _  __ ____   ___   ____${NC}"
-  echo -e "${RED}| | / // / / __/  /  |/  // _ |/ __//_  __// __// _ \ / |/ // __ \ / _ \ / __/${NC}"
-  echo -e "${RED}| |/ // /__\ \   / /|_/ // __ |\ \   / /  / _/ / , _//    // /_/ // // // _/  ${NC}"
-  echo -e "${RED}|___//____/__/  /_/  /_//_/ |_|__/  /_/  /___//_/|_|/_/|_/ \____//____//___/  ${NC}"
-  echo -e "\n================================================================================"
-  echo -e "$COIN_NAME Masternode is up and running listening on port ${GREEN}$COIN_PORT${NC}."
-  echo -e "Configuration file is: ${GREEN}$CONFIGFOLDER/$CONFIG_FILE${NC}"
-  echo -e "Start: ${GREEN}systemctl start $COIN_NAME.service${NC}"
-  echo -e "Stop: ${GREEN}systemctl stop $COIN_NAME.service${NC}"
+function print_installed_version() {
+  echo -en "${BGREEN}"
+  $INSTALL_PATH$COIN_CLI -version | head -n 1
+  echo -en "${NC}"
+}
+
+function print_logo() {
+  $INSTALL_PATH$COIN_CLI -version | head -n 1 | head -n 5   # Current Veles Core ASCII logo
+  echo -e "     __  ___ ___   ____ ______ ____ ___   _  __ ____   ___   ____"
+  echo -e "    /  |/  // _ | / __//_  __// __// _ \ / |/ // __ \ / _ \ / __/"
+  echo -e "   / /|_/ // __ |_\ \   / /  / _/ / , _//    // /_/ // // // _/  "
+  echo -e "  /_/  /_//_/ |_|___/  /_/  /___//_/|_|/_/|_/ \____//____//___/  "
+}
+
+function print_success_screen() {
+  print_logo
+  echo -en "\n"
+  print_installed_version
+  echo -e "\n$COIN_NAME Masternode is up and running listening on port ${GREEN}$COIN_PORT${NC}."
+  echo -e "Configuration file is: ${GREEN}$DATADIR_PATH/$CONFIG_FILENAME${NC}"
+  echo -e "Start: ${GREEN}systemctl start $COIN_NAME_SHORT.service${NC}"
+  echo -e "Stop: ${GREEN}systemctl stop $COIN_NAME_SHORT.service${NC}"
   echo -e "VPS_IP:PORT ${GREEN}$NODEIP:$COIN_PORT${NC}"
   echo -e "MASTERNODE PRIVATEKEY is: ${GREEN}$COINKEY${NC}"
-  echo -e "Please check ${GREEN}$COIN_NAME${NC} daemon is running with the following command: ${GREEN}systemctl status $COIN_NAME.service${NC}"
+  echo -e "Please check ${GREEN}$COIN_NAME_SHORT${NC} daemon is running with the following command: ${GREEN}systemctl status $COIN_NAME_SHORT.service${NC}"
   echo -e "Use ${GREEN}$COIN_CLI masternode status${NC} to check your MN."
   echo -e "For help join discord ${RED}https://discord.gg/P528fGg${NC} ..."
   if [[ -n $SENTINEL_REPO  ]]; then
-  echo -e "${GREEN}Sentinel${NC} is installed in ${RED}$CONFIGFOLDER/sentinel${NC}"
-  echo -e "Sentinel logs is: ${GREEN}$CONFIGFOLDER/sentinel.log${NC}"
+  echo -e "${GREEN}Sentinel${NC} is installed in ${RED}$DATADIR_PATH/sentinel${NC}"
+  echo -e "Sentinel logs is: ${GREEN}$DATADIR_PATH/sentinel.log${NC}"
   fi
   echo -e "==================================================================================================================="
 }
@@ -265,6 +280,7 @@ function install_masternode() {
   create_key
   update_config
   configure_systemd
+  start_systemd_service
  }
 
 
@@ -276,10 +292,10 @@ else
   ARG1=""
 fi
 
-check_environment
+check_system
 download_node
 install_daemon 
 install_masternode
-print_information
+print_success_screen
 
 echo -e "\n${BGREEN}Congratulations, installation was successful.\n"
