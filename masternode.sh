@@ -152,16 +152,6 @@ systemctl status ${COIN_NAME_SHORT}.service
 cat ${DATADIR_PATH}/debug.log
 ${NC}"
   fi
-          
-  && pok || perr "Failed to start systemd service ${COIN_NAME_SHORT}.service"
-
-  if [[ -z "$(ps axo cmd:100 | egrep $COIN_DAEMON)" ]]; then
-    echo -e "${RED}${COIN_NAME_SHORT} is not running${NC}, please investigate. You should start by running the following commands as root:"
-    echo -e "${GREEN}systemctl start${NC} ${COIN_NAME_SHORT}.service"
-    echo -e "systemctl status ${COIN_NAME_SHORT}.service"
-    echo -e "less /var/log/syslog${NC}"
-    exit 1
-  fi
 }
 
 function create_config() {
