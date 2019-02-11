@@ -7,11 +7,15 @@ stages:
 jobs:
   include:
     - stage: test
+      name: '[experimental] Linux Mint [latest]  [GOAL: install, update]'
+      script:
+         - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw vcatechnology/linux-mint /bin/bash -c "apt-get update ; apt-get install -q -y wget make procps python ; cd /veles-masternode/; make test_as_root"
+    - stage: test
       name: 'Ubuntu [xenial]  [GOAL: install, update]'
       script:
          - travis_retry make test
     - stage: test
-      name: 'Debian [netinst, stable]  [GOAL: install, update]'
+      name: 'Debian [stable]  [GOAL: install, update]'
       script:
          - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw debian:latest /bin/bash -c "apt-get update ; apt-get install -q -y wget make procps python ; cd /veles-masternode/; make test_as_root"
     - stage: test
@@ -19,7 +23,7 @@ jobs:
       script:
          - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw centos:latest /bin/bash -c "yum -y install make wget python ; cd /veles-masternode/; make test_as_root"
     - stage: test
-      name: 'Gentoo [stage3, latest]  [GOAL: install, update]'
+      name: 'Gentoo [stage3]  [GOAL: install, update]'
       script:
          - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw gentoo/stage3-amd64 /bin/bash -c "cd /veles-masternode/; make test_as_root"
 
