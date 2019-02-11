@@ -7,6 +7,10 @@ stages:
 jobs:
   include:
     - stage: test
+      name: '[experimental] Fedora [latest]  [GOAL: install, update]'
+      script:
+         - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw centos:latest /bin/bash -c "yum -y install make wget python ; cd /veles-masternode/; make test_as_root"
+    - stage: test
       name: '[experimental] Linux Mint [latest]  [GOAL: install, update]'
       script:
          - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw vcatechnology/linux-mint /bin/bash -c "apt-get update ; apt-get install -q -y wget make procps python ; cd /veles-masternode/; make test_as_root"
