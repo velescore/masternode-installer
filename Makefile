@@ -3,42 +3,31 @@ SYSD_TOOL_URL=https://raw.githubusercontent.com/gdraheim/docker-systemctl-replac
 SCRIPT_URL=https://raw.githubusercontent.com/Velescore/veles-masternode-install/master/masternode.sh
 DAEMON_NAME=velesd
 
-test:
-	make prepare
-	@echo '[test] Running the script [install mode] ...'
-	sudo ./masternode.sh --nonint
-	@echo '[test] Done: Installation finished, checking whether daemon is running ...'
-	@ps aux | grep -v grep | grep velesd || exit 1
-	@echo '[test] Running the script [update mode] ...'
-	sudo ./masternode.sh --nonint
-	@echo '[test] Done: Update finished, checking whether daemon is running ...'
-	@ps aux | grep -v grep | grep velesd || exit 1
-	@make clean
-
-test_as_root:
-	make prepare
-	make docker_fix_systemd
-	@echo '[test] Running the script [install mode] ...'
+test_install:
+	@echo '[test_install] Running the masternode script ...'
 	./masternode.sh --nonint
-	@echo '[test] Done: Installation finished, checking whether daemon is running ...'
-	@ps aux | grep -v grep | grep velesd || exit 1
-	@echo '[test] Running the script [update mode] ...'
-	./masternode.sh --nonint
-	@echo '[test] Done: Update finished, checking whether daemon is running ...'
-	@ps aux | grep -v grep | grep velesd || exit 1
-	@make clean
+	@echo '[test_install] Done: Masternode script finished with success.'
+	@echo -n '[test_install] Checking whether Veles Core daemon is running ... '
+	@ps aux | grep -v grep | grep velesd && echo 'success' || exit 1
 
-prepare:
+docker_test_install:
+	@echo '[docker_test_install] Installing custom Docker systemd ...'
+	make get_docker_systemd
+	@echo '[docker_test_install] Starting the test ...'
+	make test_install
+
+get_assertion_tool:
 	@echo '[test] Preparing the tests ...'
-	wget --quiet $(ASSERT_TOOL_URL) || exit 1
-	chmod +x assert.sh || exit 1
+	[ -f assert.sh ] || wget --quiet $(ASSERT_TOOL_URL) || exit 1
+	[ -x assert.sh ] || chmod +x assert.sh || exit 1
 
-docker_fix_systemd:
-	wget --quiet $(SYSD_TOOL_URL) || exit 1
-	cp systemctl.py /usr/bin/systemctl
-	chmod +x /usr/bin/systemctl
-	if ! [ -d "/etc/systemd/system" ]; then mkdir -p "/etc/systemd/system" ; fi
+get_docker_systemd:
+	[ -f systemctl.py ] || wget --quiet $(SYSD_TOOL_URL) || exit 1
+	[ -x systemctl.py ] || chmod +x systemctl.py || exit 1
+	mv systemctl.py /usr/bin/systemctl || exit 1
+	[ -d "/etc/systemd/system" ] || mkdir -p "/etc/systemd/system" || exit 1
 
 clean:
 	echo "[test] Cleaning up ..."
+	@rm assert.sh
 	@rm assert.sh
