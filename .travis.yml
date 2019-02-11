@@ -2,3 +2,17 @@ os: linux
 dist: xenial
 language: bash
 script: make test
+stages:
+  - test
+jobs:
+  include:
+    - stage: test
+      name: 'Ubuntu [xenial]  [GOAL: install, update]'
+      env: >-
+        HOST=x86_64-unknown-linux-gnu
+        DOCKER_NAME_TAG=ubuntu:16.04
+    - stage: test
+      name: 'Ubuntu [trusty]  [GOAL: install, update]'
+      env: >-
+        HOST=x86_64-unknown-linux-gnu
+        DOCKER_NAME_TAG=ubuntu:14.04
