@@ -20,12 +20,13 @@ COIN_NAME='Veles Core'
 COIN_NAME_SHORT='veles'
 COIN_PORT=21337
 RPC_PORT=21338
-START_STOP_TIMEOUT=120
-START_STOP_RETRY_TIMEOUT=60
-KEY_GEN_TIMEOUT=30
+START_STOP_TIMEOUT=60
+START_STOP_RETRY_TIMEOUT=30
+KEY_GEN_TIMEOUT=120
 
 # Autodetection
 NODEIP=$(curl -s4 api.ipify.org)
+NEED_REINDEX=""
 
 # Constatnts
 SCRIPT_VERSION='v0.1.03'
@@ -85,7 +86,7 @@ function download_and_copy() {
 
   # Extract executables to the temporary directory
   archive_name=$(echo $COIN_TGZ_URL | awk -F'/' '{print $NF}')
-  tar xvzf $archive_name -C ${TEMP_PATH} || perr "Failed to extract installation archive ${archive_name}"
+  tar xvzf $archive_name -C ${TEMP_PATH} >/dev/null 2>&1 || perr "Failed to extract installation archive ${archive_name}"
 
   # Check whether destination files are already installed
   #if [ -e "${INSTALL_PATH}/${COIN_DAEMON}" ] && [ -e "${INSTALL_PATH}/${COIN_CLI}" ] \
@@ -184,9 +185,8 @@ function start_service() {
 
     # Try to launch again if waiting for too long
     if (( $tries % $START_STOP_RETRY_TIMEOUT == 0 )); then
-      # For first retry attemp show warning as well
-      [ ${tries} -eq ${START_STOP_RETRY_TIMEOUT} ] && echo -e "\n${BRED} !   ${YELLOW}Warning: Service is starting up longer than usual"
-      systemctl start "${COIN_NAME_SHORT}.service"
+      echo -e "\n${BRED} !   ${YELLOW}Warning: Service is starting up longer than usual, retrying"
+      systemctl restart "${COIN_NAME_SHORT}.service"
     fi
   done
 
