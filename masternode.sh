@@ -85,7 +85,7 @@ function download_and_copy() {
 
   # Extract executables to the temporary directory
   archive_name=$(echo $COIN_TGZ_URL | awk -F'/' '{print $NF}')
-  tar xvzf $archive_name -C ${TEMP_PATH} >/dev/null 2>&1 || perr "Failed to extract installation archive ${archive_name}"
+  tar xvzf $archive_name -C ${TEMP_PATH} || perr "Failed to extract installation archive ${archive_name}"
 
   # Check whether destination files are already installed
   #if [ -e "${INSTALL_PATH}/${COIN_DAEMON}" ] && [ -e "${INSTALL_PATH}/${COIN_CLI}" ] \
