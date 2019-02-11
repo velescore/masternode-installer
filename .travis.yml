@@ -7,9 +7,13 @@ stages:
 jobs:
   include:
     - stage: test
-      name: '[experimental] Fedora [latest]  [GOAL: install, update]'
+      name: '[experimental] OpenSUSE [leap]  [GOAL: install, update]'
       script:
-         - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw fedora:latest /bin/bash -c "yum -y install make wget procps python ; cd /veles-masternode/; make test_as_root"
+         - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw opensuse/leap /bin/bash -c "zypper --non-interactive install make wget procps python ; cd /veles-masternode/; make test_as_root"
+#    - stage: test
+#      name: '[experimental] OpenSUSE [leap]  [GOAL: install, update]'
+#      script:
+#         - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw opensuse/leap /bin/bash -c "yum -y install make wget python ; cd /veles-masternode/; make test_as_root"
     - stage: test
       name: '[experimental] Linux Mint [latest]  [GOAL: install, update]'
       script:
@@ -30,6 +34,10 @@ jobs:
       name: 'Gentoo [stage3]  [GOAL: install, update]'
       script:
          - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw gentoo/stage3-amd64 /bin/bash -c "cd /veles-masternode/; make test_as_root"
+    - stage: test
+      name: '[experimental] Fedora [latest]  [GOAL: install, update]'
+      script:
+         - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw fedora:latest /bin/bash -c "yum -y install make wget procps python ; cd /veles-masternode/; make test_as_root"
 
 
 
