@@ -20,9 +20,9 @@ COIN_NAME='Veles Core'
 COIN_NAME_SHORT='veles'
 COIN_PORT=21337
 RPC_PORT=21338
-START_STOP_TIMEOUT=60
-START_STOP_RETRY_TIMEOUT=30
-KEY_GEN_TIMEOUT=20
+START_STOP_TIMEOUT=45
+START_STOP_RETRY_TIMEOUT=15
+KEY_GEN_TIMEOUT=15
 
 # Autodetection
 NODEIP=$(curl -s4 api.ipify.org)
@@ -113,14 +113,14 @@ function download_and_copy() {
 
   pok
 
-  rm -rf $TEMP_PATH >/dev/null 2>&1 || echo -e "\n${BRED} !   ${YELLOW}Warning: Failed to remove temporary directory: ${TEMP_PATH}${NC}\n"
+  rm -rf $TEMP_PATH >/dev/null 2>&1 || echo -e "\n${BYELLOW} !   ${YELLOW}Warning: Failed to remove temporary directory: ${TEMP_PATH}${NC}\n"
 }
 
 function create_user() {
   echo -e "${ST}   Setting up user account ... "
   # our new mnode unpriv user acc is added
   if id "$USER" >/dev/null 2>&1; then
-    echo -e "\n${BRED} !   ${BYELLOW}Warning: User account ${BYELLOW}${USER}${NC} already exists."                       
+    echo -e "\n${BYELLOW} !   ${BYELLOW}Warning: User account ${BYELLOW}${USER}${NC} already exists."                       
   else
     echo -en "${ST}     Creating new user account ${YELLOW}${USER}${NC} ...                               "
     useradd -m $USER && pok || perr
@@ -185,18 +185,22 @@ function start_service() {
 
     # Try to launch again if waiting for too long
     if (( $tries % $START_STOP_RETRY_TIMEOUT == 0 )); then
-      echo -e "\n${BRED} !   ${YELLOW}Warning: Service is starting up longer than usual, retrying"
-      systemctl restart "${COIN_NAME_SHORT}.service"
+      echo -en "\n${BYELLOW} !   ${YELLOW}Warning: Service is starting up longer than usual, retrying ...     "
+      systemctl restart "${COIN_NAME_SHORT}.service" > /dev/null
     fi
   done
 
   if [ ${tries} -eq ${START_STOP_TIMEOUT} ]; then
     perr "Service ${COIN_NAME_SHORT}.service failed to start (timeout), ${COIN_DAEMON} is not running,
-please investigate. You can begin by running following commands as root: ${BYELLOW}
-systemctl start ${COIN_NAME_SHORT}.service
-systemctl status ${COIN_NAME_SHORT}.service
-cat ${DATADIR_PATH}/debug.log
-${NC}"
+${RED}please investigate. You can begin by checking output of following commands as root:
+${YELLOW}systemctl start ${COIN_NAME_SHORT}.service
+${NC}"$(systemctl start ${COIN_NAME_SHORT}.service)"
+${YELLOW}systemctl status ${COIN_NAME_SHORT}.service
+${NC}"$(systemctl status ${COIN_NAME_SHORT}.service)"
+${YELLOW}cat ${DATADIR_PATH}/debug.log
+${NC}"$(cat ${DATADIR_PATH}/debug.log | tail -n 10)"
+...
+"
   else
     pok
   fi
@@ -258,14 +262,14 @@ function create_key() {
   if [[ -z "$COINKEY" ]]; then
     echo -en "${ST}   Generating masternode private key ...                               "
     ${INSTALL_PATH}/$COIN_DAEMON -daemon >/dev/null 2>&1
-    sleep 30  #${KEY_GEN_TIMEOUT}
+    sleep ${KEY_GEN_TIMEOUT}
     if [ -z "$(ps axo cmd:100 | grep $COIN_DAEMON)" ]; then
       perr "${RED}${COIN_NAME_SHORT} server couldn not start. Check /var/log/syslog for errors.${NC}"
     fi
     COINKEY=$(${INSTALL_PATH}/${COIN_CLI} masternode genkey)
     if [ "$?" -gt "0" ];then
       echo -e "${RED}Wallet not fully loaded. Let us wait and try again to generate the Private Key${NC}"
-      sleep ${KEY_GEN_TIMEOUT}
+      sleep $((KEY_GEN_TIMEOUT * 2))
       COINKEY=$(${INSTALL_PATH}/${COIN_CLI} masternode genkey)
     fi
     ${INSTALL_PATH}/${COIN_CLI} stop >/dev/null 2>&1
@@ -299,7 +303,7 @@ function get_ip() {
 
   if [ ${#NODE_IPS[@]} -gt 1 ]; then
     if [ $ARG1 == '--nonint' ]; then
-      echo -e "\n${BRED} !   ${YELLOW}Warning: More than one IPv4 detected but running in non-interactive mode, using the first one ...${NC}\n"
+      echo -e "\n${BYELLOW} !   ${YELLOW}Warning: More than one IPv4 detected but running in non-interactive mode, using the first one ...${NC}\n"
     else
       echo -e "${GREEN}More than one IPv4 detected. Please type 0 to use the first IP, 1 for the second and so on...${NC}"
       INDEX=0
@@ -332,7 +336,7 @@ function print_logo() {
   echo -e "${NC}"
 }
 
-function print_success_screen() {
+function print_install_notice() {
   print_logo
   print_installed_version
   echo -e "\n$COIN_NAME Masternode is up and running listening on port ${BYELLOW}$COIN_PORT${NC}."
@@ -341,6 +345,9 @@ function print_success_screen() {
   echo -e "Stop: ${BYELLOW}systemctl stop ${COIN_NAME_SHORT}.service${NC}"
   echo -e "VPS_IP:PORT ${BYELLOW}$NODEIP:$COIN_PORT${NC}"
   echo -e "MASTERNODE PRIVATEKEY is: ${BYELLOW}$COINKEY${NC}"
+}
+
+function print_usage_notice() {
   echo -e "Please check ${BYELLOW}${COIN_NAME_SHORT}${NC} daemon is running with the following command: ${BYELLOW}systemctl status ${COIN_NAME_SHORT}.service${NC}"
   echo -e "Use ${BYELLOW}${COIN_CLI} masternode status${NC} to check your MN."
   echo -e "For help join discord ${RED}https://discord.gg/P528fGg${NC} ..."
@@ -369,8 +376,9 @@ function start_installation() {
   download_and_copy
   configure_daemon 
   install_masternode
-  print_success_screen
-  echo -e "\n${BGREEN}Congratulations, ${COIN_NAME} installation was successful.\n"
+  print_install_notice
+  print_usage_notice
+  echo -e "\n${BGREEN}Congratulations, ${COIN_NAME} has been installed successfuly.\n"
 }
 
 function start_update() {
@@ -380,8 +388,8 @@ function start_update() {
   enable_reindex_next_start
   start_service
   disable_reindex_next_start
-  print_success_screen
-  echo -e "\n${BGREEN}Congratulations, ${COIN_NAME} update was successful.\n"
+  print_usage_notice
+  echo -e "\n${BGREEN}Congratulations, ${COIN_NAME} has been updated successfuly.\n"
 }
 
 
