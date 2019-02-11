@@ -8,11 +8,30 @@ jobs:
   include:
     - stage: test
       name: 'Ubuntu [xenial]  [GOAL: install, update]'
-      env: >-
-        HOST=x86_64-unknown-linux-gnu
-        DOCKER_NAME_TAG=ubuntu:16.04
+      script:
+         - make test
     - stage: test
-      name: 'Ubuntu [trusty]  [GOAL: install, update]'
-      env: >-
-        HOST=x86_64-unknown-linux-gnu
-        DOCKER_NAME_TAG=ubuntu:14.04
+      name: 'Debian [latest]  [GOAL: install, update]'
+      #before_install:
+      #  - sudo docker pull debian:latest
+      script:
+         # Run tests in Container
+         - sudo docker run --rm=true -v `pwd`:/veles-masternode:rw debian:latest /bin/bash -c "apt-get update ; apt-get install -q -y wget make procps systemd python ; cd /veles-masternode/; make test_as_root"
+    - stage: test
+      name: 'CentOS [latest]  [GOAL: install, update]'
+      #before_install:
+      #  - sudo docker pull centos:latest
+      script:
+         # Run tests in Container
+         - sudo docker run --rm=true -v `pwd`:/veles-masternode:rw centos:latest /bin/bash -c "yum -y install make wget python ; cd /veles-masternode/; make test_as_root"
+    - stage: test
+      name: 'Gentoo [latest]  [GOAL: install, update]'
+      #before_install:
+      #  - sudo docker pull gentoo/stage3-amd64
+      script:
+         # Run tests in Container
+         - sudo docker run --rm=true -v `pwd`:/veles-masternode:rw gentoo/stage3-amd64 /bin/bash -c "cd /veles-masternode/; make test_as_root"
+
+
+
+
