@@ -22,7 +22,7 @@ COIN_PORT=21337
 RPC_PORT=21338
 START_STOP_TIMEOUT=60
 START_STOP_RETRY_TIMEOUT=30
-KEY_GEN_TIMEOUT=120
+KEY_GEN_TIMEOUT=30
 
 # Autodetection
 NODEIP=$(curl -s4 api.ipify.org)
@@ -258,7 +258,7 @@ function create_key() {
   if [[ -z "$COINKEY" ]]; then
     echo -en "${ST}   Generating masternode private key ...                               "
     ${INSTALL_PATH}/$COIN_DAEMON -daemon >/dev/null 2>&1
-    sleep ${KEY_GEN_TIMEOUT}
+    sleep 30  #${KEY_GEN_TIMEOUT}
     if [ -z "$(ps axo cmd:100 | grep $COIN_DAEMON)" ]; then
       perr "${RED}${COIN_NAME_SHORT} server couldn not start. Check /var/log/syslog for errors.${NC}"
     fi
