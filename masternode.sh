@@ -20,6 +20,9 @@ COIN_NAME='Veles Core'
 COIN_NAME_SHORT='veles'
 COIN_PORT=21337
 RPC_PORT=21338
+START_STOP_TIMEOUT=120
+START_STOP_RETRY_TIMEOUT=60
+KEY_GEN_TIMEOUT=30
 
 # Autodetection
 NODEIP=$(curl -s4 api.ipify.org)
@@ -79,7 +82,20 @@ function download_and_copy() {
   echo -en "${ST}   Downloading installation archive ...                                "
   cd $TEMP_PATH >/dev/null 2>&1 || perr "Cannot change to the temporary directory: $TEMP_PATH"
   wget -q $COIN_TGZ_URL || perr "Failed to download installation archive"
+
+  # Extract executables to the temporary directory
   archive_name=$(echo $COIN_TGZ_URL | awk -F'/' '{print $NF}')
+  tar xvzf $archive_name -C ${TEMP_PATH} >/dev/null 2>&1 || perr "Failed to extract installation archive ${archive_name}"
+
+  # Check whether destination files are already installed
+  #if [ -e "${INSTALL_PATH}/${COIN_DAEMON}" ] && [ -e "${INSTALL_PATH}/${COIN_CLI}" ] \
+  #  && [ "$(md5sum ${TEMP_PATH}/${COIN_DAEMON})" == "$(md5sum ${INSTALL_PATH}/${COIN_DAEMON})" ] \
+  #  && [ "$(md5sum ${TEMP_PATH}/${COIN_CLI})" == "$(md5sum ${INSTALL_PATH}/${COIN_CLI})" ]; then
+  #  echo
+  #  print_installed_version
+  #  echo -e "\n${BGREEN}Congratulations, you have the latest version of ${COIN_NAME} already installed.\n"
+  #fi
+  
   # Remove if destination files already exist
   if [ -e "${INSTALL_PATH}/${COIN_DAEMON}" ]; then
     rm "${INSTALL_PATH}/${COIN_DAEMON}" || perr "Failed to remove old version of ${COIN_DAEMON}"
@@ -87,23 +103,23 @@ function download_and_copy() {
   if [ -e "${INSTALL_PATH}/${COIN_CLI}" ]; then
     rm "${INSTALL_PATH}/${COIN_CLI}" || perr "Failed to remove old version of ${COIN_CLI}"
   fi
-  if [ -e "${INSTALL_PATH}/${COIN_NAME}-qt" ]; then
-    rm "${INSTALL_PATH}/${COIN_NAME}-qt" || perr "Failed to remove old version of ${COIN_NAME}-qt"
-  fi
-  if [ -e "${INSTALL_PATH}/${COIN_NAME}-tx" ]; then 
-    rm "${INSTALL_PATH}/${COIN_NAME}-tx" || perr "Failed to remove old version of ${COIN_NAME}-tx"
-  fi
-  # Extract executables to the installation directory
-  tar xvzf $archive_name -C ${INSTALL_PATH}/ >/dev/null 2>&1 || perr "Failed to extract installation archive $archive_name to ${INSTALL_PATH}"
+
+  # Copy the files to installation directory and ensure executable flags
+  cp "${TEMP_PATH}/${COIN_DAEMON}" "${INSTALL_PATH}/${COIN_DAEMON}" || "Failed to copy ${COIN_DAEMON} to ${INSTALL_PATH}"
+  cp "${TEMP_PATH}/${COIN_CLI}" "${INSTALL_PATH}/${COIN_CLI}" || "Failed to copy ${COIN_CLI} to ${INSTALL_PATH}"
+  chmod +x "${INSTALL_PATH}/${COIN_DAEMON}" || "Failed to set exacutable flag for ${INSTALL_PATH}/${COIN_DAEMON}"
+  chmod +x "${INSTALL_PATH}/${COIN_CLI}" || "Failed to set exacutable flag for ${INSTALL_PATH}/${COIN_CLI}"
+
   pok
-  rm -rf $TEMP_PATH >/dev/null 2>&1 || echo -e "\n{$BRED} !   ${YELLOW}Warning: Failed to remove temporary directory: ${TEMP_PATH}${NC}\n"
+
+  rm -rf $TEMP_PATH >/dev/null 2>&1 || echo -e "\n${BRED} !   ${YELLOW}Warning: Failed to remove temporary directory: ${TEMP_PATH}${NC}\n"
 }
 
 function create_user() {
   echo -e "${ST}   Setting up user account ... "
   # our new mnode unpriv user acc is added
   if id "$USER" >/dev/null 2>&1; then
-    echo -e "\n{$BRED} !   ${BYELLOW}Warning: User account ${BYELLOW}${USER}${NC} already exists."                       
+    echo -e "\n${BRED} !   ${BYELLOW}Warning: User account ${BYELLOW}${USER}${NC} already exists."                       
   else
     echo -en "${ST}     Creating new user account ${YELLOW}${USER}${NC} ...                               "
     useradd -m $USER && pok || perr
@@ -158,23 +174,50 @@ EOF
 
 function start_service() {
   echo -en "${ST}   Starting ${COIN_NAME_SHORT}.service ...                                          "
-  systemctl start "${COIN_NAME_SHORT}.service"
-  # The service start-up might be delayed, just gradually try to wait for it ...
-  ps aux | grep -v grep | grep "${INSTALL_PATH}/${COIN_DAEMON}" > /dev/null || sleep 3
-  ps aux | grep -v grep | grep "${INSTALL_PATH}/${COIN_DAEMON}" > /dev/null || sleep 10
-  ps aux | grep -v grep | grep "${INSTALL_PATH}/${COIN_DAEMON}" > /dev/null || sleep 30
-  ps aux | grep -v grep | grep "${INSTALL_PATH}/${COIN_DAEMON}" > /dev/null && pok || perr "Service ${COIN_NAME_SHORT}.service failed to start, ${COIN_DAEMON} is not running,
+  systemctl start "${COIN_NAME_SHORT}.service" || tries=${START_STOP_TIMEOUT}
+  tries=0
+
+  # Wait until we see the proccess running, or until timeout
+  while ! ps aux | grep -v grep | grep "${INSTALL_PATH}/${COIN_DAEMON}" > /dev/null && [ ${tries} -lt ${START_STOP_TIMEOUT} ]; do
+    sleep 5
+    ((tries++))
+
+    # Try to launch again if waiting for too long
+    if (( $tries % $START_STOP_RETRY_TIMEOUT == 0 )); then
+      # For first retry attemp show warning as well
+      [ ${tries} -eq ${START_STOP_RETRY_TIMEOUT} ] && echo -e "\n${BRED} !   ${YELLOW}Warning: Service is starting up longer than usual"
+      systemctl start "${COIN_NAME_SHORT}.service"
+    fi
+  done
+
+  if [ ${tries} -eq ${START_STOP_TIMEOUT} ]; then
+    perr "Service ${COIN_NAME_SHORT}.service failed to start (timeout), ${COIN_DAEMON} is not running,
 please investigate. You can begin by running following commands as root: ${BYELLOW}
 systemctl start ${COIN_NAME_SHORT}.service
 systemctl status ${COIN_NAME_SHORT}.service
 cat ${DATADIR_PATH}/debug.log
 ${NC}"
+  else
+    pok
+  fi
 }
 
 function stop_service() {
   echo -en "${ST}   Stopping ${COIN_NAME_SHORT}.service ...                                          "
   systemctl stop "${COIN_NAME_SHORT}.service" || perr "Service ${COIN_NAME_SHORT} failed to stop."
-  sleep 1 && pok
+  tries=0
+
+  # Wait until we NOT see the proccess running, or until timeout
+  while ps aux | grep -v grep | grep "${INSTALL_PATH}/${COIN_DAEMON}" > /dev/null && [ ${tries} -lt ${START_STOP_TIMEOUT} ]; do
+    sleep 1
+    ((tries++))
+  done
+
+  if [ ${tries} -eq ${START_STOP_TIMEOUT} ]; then
+    perr "Service ${COIN_NAME_SHORT} failed to stop."
+  else
+    pok
+  fi
 }
 
 function enable_reindex_next_start() {
@@ -215,14 +258,14 @@ function create_key() {
   if [[ -z "$COINKEY" ]]; then
     echo -en "${ST}   Generating masternode private key ...                               "
     ${INSTALL_PATH}/$COIN_DAEMON -daemon >/dev/null 2>&1
-    sleep 30
+    sleep ${KEY_GEN_TIMEOUT}
     if [ -z "$(ps axo cmd:100 | grep $COIN_DAEMON)" ]; then
       perr "${RED}${COIN_NAME_SHORT} server couldn not start. Check /var/log/syslog for errors.${NC}"
     fi
     COINKEY=$(${INSTALL_PATH}/${COIN_CLI} masternode genkey)
     if [ "$?" -gt "0" ];then
       echo -e "${RED}Wallet not fully loaded. Let us wait and try again to generate the Private Key${NC}"
-      sleep 30
+      sleep ${KEY_GEN_TIMEOUT}
       COINKEY=$(${INSTALL_PATH}/${COIN_CLI} masternode genkey)
     fi
     ${INSTALL_PATH}/${COIN_CLI} stop >/dev/null 2>&1
@@ -256,7 +299,7 @@ function get_ip() {
 
   if [ ${#NODE_IPS[@]} -gt 1 ]; then
     if [ $ARG1 == '--nonint' ]; then
-      echo -e "\n{$BRED} !   ${YELLOW}Warning: More than one IPv4 detected but running in non-interactive mode, using the first one ...${NC}\n"
+      echo -e "\n${BRED} !   ${YELLOW}Warning: More than one IPv4 detected but running in non-interactive mode, using the first one ...${NC}\n"
     else
       echo -e "${GREEN}More than one IPv4 detected. Please type 0 to use the first IP, 1 for the second and so on...${NC}"
       INDEX=0
@@ -312,12 +355,12 @@ function configure_daemon() {
   get_ip
   check_ufw
   create_config
+  configure_systemd
  }
 
 function install_masternode() {
   create_key
   update_config
-  configure_systemd
   start_service
  }
 
@@ -348,6 +391,14 @@ if ! [ -z "$1" ]; then
   ARG1="${1}"
 else
   ARG1=""
+fi
+
+if [ "${ARG1}" == "--nonint" ]; then
+  echo -e "\n[ $0: Running in non-interactive mode, increasing timeout settings ]"
+  # Increase timeouts when in non-interactive mode
+  START_STOP_TIMEOUT=$((START_STOP_TIMEOUT * 2))
+  START_STOP_RETRY_TIMEOUT=$((START_STOP_RETRY_TIMEOUT * 2))
+  KEY_GEN_TIMEOUT=$((KEY_GEN_TIMEOUT * 2))
 fi
 
 check_installation
