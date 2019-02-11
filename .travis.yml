@@ -9,7 +9,7 @@ jobs:
     - stage: test
       name: 'Ubuntu [xenial]  [GOAL: install, update]'
       script:
-         - travis_retry sudo make test_install && make test_install
+         - travis_retry sudo make test_install && sudo make test_install
     - stage: test
       name: 'Linux Mint [latest]  [GOAL: install]'
       script:
