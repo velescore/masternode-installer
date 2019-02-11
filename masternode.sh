@@ -1,6 +1,5 @@
 #!/bin/bash
-# version 	v0.1.02
-# date    	2019-02-09
+# version 	v0.1.03
 # description:	Installation of an Veles masternode
 # website:      https://veles.network
 # twitter:      https://twitter.com/mdfkbtc
@@ -26,7 +25,7 @@ RPC_PORT=21338
 NODEIP=$(curl -s4 api.ipify.org)
 
 # Constatnts
-SCRIPT_VERSION='v0.1.02'
+SCRIPT_VERSION='v0.1.03'
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -160,8 +159,10 @@ EOF
 function start_service() {
   echo -en "${ST}   Starting ${COIN_NAME_SHORT}.service ...                                          "
   systemctl start "${COIN_NAME_SHORT}.service"
-  sleep 1   # just in case
-  #if [ -n "$(pidof ${COIN_DAEMON})" ]; then
+  # The service start-up might be delayed, just gradually try to wait for it ...
+  ps aux | grep -v grep | grep "${INSTALL_PATH}/${COIN_DAEMON}" > /dev/null || sleep 3
+  ps aux | grep -v grep | grep "${INSTALL_PATH}/${COIN_DAEMON}" > /dev/null || sleep 10
+  ps aux | grep -v grep | grep "${INSTALL_PATH}/${COIN_DAEMON}" > /dev/null || sleep 30
   ps aux | grep -v grep | grep "${INSTALL_PATH}/${COIN_DAEMON}" > /dev/null && pok || perr "Service ${COIN_NAME_SHORT}.service failed to start, ${COIN_DAEMON} is not running,
 please investigate. You can begin by running following commands as root: ${BYELLOW}
 systemctl start ${COIN_NAME_SHORT}.service
