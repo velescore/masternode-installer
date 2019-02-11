@@ -9,7 +9,7 @@ jobs:
     - stage: test
       name: '[experimental] OpenSUSE [leap]  [GOAL: install, update]'
       script:
-         - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw opensuse/leap /bin/bash -c "zypper --non-interactive install make wget tar python ; cd /veles-masternode/; make test_as_root"
+         - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw opensuse/leap /bin/bash -c "zypper --non-interactive install make wget tar gzip python ; cd /veles-masternode/; make test_as_root"
 #    - stage: test
 #      name: '[experimental] OpenSUSE [leap]  [GOAL: install, update]'
 #      script:
