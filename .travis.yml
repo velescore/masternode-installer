@@ -9,28 +9,19 @@ jobs:
     - stage: test
       name: 'Ubuntu [xenial]  [GOAL: install, update]'
       script:
-         - make test
+         - travis_retry make test
     - stage: test
-      name: 'Debian [latest]  [GOAL: install, update]'
-      #before_install:
-      #  - sudo docker pull debian:latest
+      name: 'Debian [netinst, stable]  [GOAL: install, update]'
       script:
-         # Run tests in Container
-         - sudo docker run --rm=true -v `pwd`:/veles-masternode:rw debian:latest /bin/bash -c "apt-get update ; apt-get install -q -y wget make procps systemd python ; cd /veles-masternode/; make test_as_root"
+         - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw debian:latest /bin/bash -c "apt-get update ; apt-get install -q -y wget make procps python ; cd /veles-masternode/; make test_as_root"
     - stage: test
       name: 'CentOS [latest]  [GOAL: install, update]'
-      #before_install:
-      #  - sudo docker pull centos:latest
       script:
-         # Run tests in Container
-         - sudo docker run --rm=true -v `pwd`:/veles-masternode:rw centos:latest /bin/bash -c "yum -y install make wget python ; cd /veles-masternode/; make test_as_root"
+         - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw centos:latest /bin/bash -c "yum -y install make wget python ; cd /veles-masternode/; make test_as_root"
     - stage: test
-      name: 'Gentoo [latest]  [GOAL: install, update]'
-      #before_install:
-      #  - sudo docker pull gentoo/stage3-amd64
+      name: 'Gentoo [stage3, latest]  [GOAL: install, update]'
       script:
-         # Run tests in Container
-         - sudo docker run --rm=true -v `pwd`:/veles-masternode:rw gentoo/stage3-amd64 /bin/bash -c "cd /veles-masternode/; make test_as_root"
+         - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw gentoo/stage3-amd64 /bin/bash -c "cd /veles-masternode/; make test_as_root"
 
 
 
