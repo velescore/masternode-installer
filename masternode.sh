@@ -26,6 +26,7 @@ RPC_PORT=21338
 NODEIP=$(curl -s4 api.ipify.org)
 
 # Constatnts
+SCRIPT_VERSION='v0.1.02'
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -35,7 +36,7 @@ BGREEN='\033[1;32m'
 BBLUE='\033[1;34m'
 BYELLOW='\033[1;33m'
 NC='\033[0m'
-ST="${BGREEN} * ${NC}"
+ST="${BGREEN} *${NC}"
 OK="${BLUE}[ ${NC}${BGREEN}ok${NC}${BLUE} ]${NC}"
 ERR="${BLUE}[ ${NC}${BRED}"'!!'"${NC}${BLUE} ]${NC}"
 
@@ -45,7 +46,7 @@ function pok() {
 
 function perr() {
   echo -e "${ERR}"
-  if [ -z $1 ]; then
+  if [ -z "${1}" ]; then
     echo -e "\n${RED}Done: The installation has been terminated because an error has occured.${NC}"
   else
     echo -e "\n${RED}Error: ${1}\nDone: The installation has been terminated.${NC}"
@@ -53,16 +54,20 @@ function perr() {
   exit 1
 }
 
-function check_system() {
-  echo -en "${ST} Looking for previous installation ...                                 "
-  if [ -n "$(pidof $COIN_DAEMON)" ] || [ -e "${INSTALL_PATH}/${COIN_DAEMON}" ] ; then
-    perr "$COIN_NAME is already installed."
+function check_installation() {
+  echo -en "\n${ST} Checking whether ${COIN_NAME} is already installed ... "
+  #if [ -n "$(pidof $COIN_DAEMON)" ] || [ -e "${INSTALL_PATH}/${COIN_DAEMON}" ] ; then
+  if [ -e "${INSTALL_PATH}/${COIN_DAEMON}" ] ; then
+    echo "yes"
+    start_update
+  else
+    echo "no"
+    start_installation
   fi
-  pok
 }
 
 function check_ufw() {
-  echo -en "${ST} Checking whether UFW firewall is present ... "
+  echo -en "${ST}   Checking whether UFW firewall is present ... "
   if [ -f "/sbin/ufw" ] && ufw status | grep -wq 'active'; then 
     echo "yes"
     setup_ufw
@@ -71,28 +76,40 @@ function check_ufw() {
   fi
 }
 
-function download_node() {
-  echo -en "${ST} Downloading installation archive ...                                  "
+function download_and_copy() {
+  echo -en "${ST}   Downloading installation archive ...                                "
   cd $TEMP_PATH >/dev/null 2>&1 || perr "Cannot change to the temporary directory: $TEMP_PATH"
   wget -q $COIN_TGZ_URL || perr "Failed to download installation archive"
-  
   archive_name=$(echo $COIN_TGZ_URL | awk -F'/' '{print $NF}')
-
-  tar xvzf $archive_name -C ${INSTALL_PATH}/ >/dev/null 2>&1 || "Failed to extract installation archive $archive_name to ${INSTALL_PATH}"
+  # Remove if destination files already exist
+  if [ -e "${INSTALL_PATH}/${COIN_DAEMON}" ]; then
+    rm "${INSTALL_PATH}/${COIN_DAEMON}" || perr "Failed to remove old version of ${COIN_DAEMON}"
+  fi
+  if [ -e "${INSTALL_PATH}/${COIN_CLI}" ]; then
+    rm "${INSTALL_PATH}/${COIN_CLI}" || perr "Failed to remove old version of ${COIN_CLI}"
+  fi
+  if [ -e "${INSTALL_PATH}/${COIN_NAME}-qt" ]; then
+    rm "${INSTALL_PATH}/${COIN_NAME}-qt" || perr "Failed to remove old version of ${COIN_NAME}-qt"
+  fi
+  if [ -e "${INSTALL_PATH}/${COIN_NAME}-tx" ]; then 
+    rm "${INSTALL_PATH}/${COIN_NAME}-tx" || perr "Failed to remove old version of ${COIN_NAME}-tx"
+  fi
+  # Extract executables to the installation directory
+  tar xvzf $archive_name -C ${INSTALL_PATH}/ >/dev/null 2>&1 || perr "Failed to extract installation archive $archive_name to ${INSTALL_PATH}"
   pok
   rm -rf $TEMP_PATH >/dev/null 2>&1 || echo -e "\n{$BRED} !   ${YELLOW}Warning: Failed to remove temporary directory: ${TEMP_PATH}${NC}\n"
 }
 
 function create_user() {
-  echo -e "${ST} Setting up user account ... "
+  echo -e "${ST}   Setting up user account ... "
   # our new mnode unpriv user acc is added
   if id "$USER" >/dev/null 2>&1; then
-    echo -e "\n{$BRED} !   ${YELLOW}Warning: User account ${YELLOW}${USER}${NC} already exists."                       
+    echo -e "\n{$BRED} !   ${BYELLOW}Warning: User account ${BYELLOW}${USER}${NC} already exists."                       
   else
-    echo -en "${ST}   Creating new user account ${YELLOW}${USER}${NC} ...                                 "
+    echo -en "${ST}     Creating new user account ${YELLOW}${USER}${NC} ...                               "
     useradd -m $USER && pok || perr
     # TODO: move to another function
-    echo -en "${ST}   Creating new datadir ...                                            "
+    echo -en "${ST}     Creating new datadir ...                                          "
     su - $USER -c "mkdir ${DATADIR_PATH} >/dev/null 2>&1" || perr	"Failed to create datadir: ${DATADIR_PATH}"
     su - $USER -c "touch ${DATADIR_PATH}/${CONFIG_FILENAME} >/dev/null 2>&1" || perr "Failed to create config file: ${DATADIR_PATH}/${CONFIG_FILENAME}"
     pok
@@ -100,7 +117,7 @@ function create_user() {
 }
 
 function setup_ufw() {
-  echo -en "${ST}   Enabling inbound traffic on TCP port ${BYELLOW}${COIN_PORT}${NC} ...                      "
+  echo -en "${ST}     Enabling inbound traffic on TCP port ${BYELLOW}${COIN_PORT}${NC} ...                    "
   ufw allow $COIN_PORT/tcp comment "${COIN_NAME_SHORT} MN port" >/dev/null 2>&1 || perr "Failed to set-up UFW (ufw allow $COIN_PORT/tcp)"
   ufw allow ssh comment "SSH" >/dev/null 2>&1 || perr "Failed to set-up UFW (ufw allow $COIN_PORT/tcp)"
   ufw limit ssh/tcp >/dev/null 2>&1 || perr "Failed to set-up UFW (ufw allow $COIN_PORT/tcp)"
@@ -110,8 +127,9 @@ function setup_ufw() {
 }
  
 function configure_systemd() {
-  echo -en "${ST} Creating systemd service ${BYELLOW}${COIN_NAME_SHORT}${NC} ...                                    "
-  cat << EOF > /etc/systemd/system/${COIN_NAME_SHORT}.service && pok || perr
+  echo -en "${ST}   Creating systemd service ${BYELLOW}${COIN_NAME_SHORT}${NC} ...                                  "
+  cat << EOF > /etc/systemd/system/${COIN_NAME_SHORT}.service && pok || perr "Failed to create systemd service"
+## Generated by Veles Core script masternode.sh ${SCRIPT_VERSION}
 [Unit]
 Description=${COIN_NAME_SHORT} service
 After=network.target
@@ -120,7 +138,7 @@ User=$USER
 Group=$USER
 Type=forking
 #PIDFile=$DATADIR_PATH/${COIN_NAME_SHORT}.pid
-ExecStart=${INSTALL_PATH}/$COIN_DAEMON -daemon -conf=$DATADIR_PATH/$CONFIG_FILENAME -datadir=$DATADIR_PATH
+ExecStart=${INSTALL_PATH}/${COIN_DAEMON} -daemon -conf=$DATADIR_PATH/$CONFIG_FILENAME -datadir=$DATADIR_PATH
 ExecStop=-${INSTALL_PATH}/${COIN_CLI} -conf=$DATADIR_PATH/$CONFIG_FILENAME -datadir=$DATADIR_PATH stop
 Restart=always
 PrivateTmp=true
@@ -131,34 +149,52 @@ StartLimitBurst=5
 [Install]
 WantedBy=multi-user.target
 EOF
-  echo -en "${ST} Reloading systemctl ...                                               "
-  systemctl daemon-reload && pok || perr "Failed to reload systemd daemon (systemctl daemon-reload)"
-  echo -en "${ST} Setting up the service to auto-start on system boot ...               "
+
+  echo -en "${ST}   Reloading systemctl ...                                             "
+  systemctl daemon-reload && pok || perr "Failed to reload systemd daemon [systemctl daemon-reload]"
+  echo -en "${ST}   Setting up the service to auto-start on system boot ...             "
   systemctl enable ${COIN_NAME_SHORT}.service >/dev/null 2>&1 && pok || perr "Failed to enable systemd servie ${COIN_NAME_SHORT}.service"
   #u $USER;cd $DATADIR_PATH
 }
 
-function start_systemd_service() {
-  echo -en "${ST} Starting ${BYELLOW}${COIN_NAME_SHORT}${NC} service ...                                            "
+function start_service() {
+  echo -en "${ST}   Starting ${COIN_NAME_SHORT}.service ...                                          "
   systemctl start "${COIN_NAME_SHORT}.service"
   sleep 1   # just in case
-  if [ -n "$(pidof ${COIN_DAEMON})" ]; then
-    pok
-  else
-    perr "Daemon ${COIN_DAEMON} is not running, please investigate. You can start by 
-running following commands as root: ${BYELLOW}
+  #if [ -n "$(pidof ${COIN_DAEMON})" ]; then
+  ps aux | grep -v grep | grep "${INSTALL_PATH}/${COIN_DAEMON}" > /dev/null && pok || perr "Service ${COIN_NAME_SHORT}.service failed to start, ${COIN_DAEMON} is not running,
+please investigate. You can begin by running following commands as root: ${BYELLOW}
 systemctl start ${COIN_NAME_SHORT}.service
 systemctl status ${COIN_NAME_SHORT}.service
 cat ${DATADIR_PATH}/debug.log
 ${NC}"
-  fi
 }
 
+function stop_service() {
+  echo -en "${ST}   Stopping ${COIN_NAME_SHORT}.service ...                                          "
+  systemctl stop "${COIN_NAME_SHORT}.service" || perr "Service ${COIN_NAME_SHORT} failed to stop."
+  sleep 1 && pok
+}
+
+function enable_reindex_next_start() {
+  # reindex after update
+  echo -en "${ST}   Scheduling database reindex on next start ...                       "
+  sed -i.bak "s/-daemon -conf/-daemon -reindex -conf/g" "/etc/systemd/system/${COIN_NAME_SHORT}.service" || "Failed to update systemd service configuration"
+  systemctl daemon-reload && pok || "Failed to reload systemd daemon"
+}
+
+function disable_reindex_next_start() {
+  sed -i.bak "s/-daemon -reindex -conf/-daemon -conf/g" "/etc/systemd/system/${COIN_NAME_SHORT}.service" || "Failed to update systemd service configuration"
+  systemctl daemon-reload || "Failed to reload systemd daemon"
+}
+
+
 function create_config() {
-  echo -en "${ST} Generating configuration file ...                                     "
+  echo -en "${ST}   Generating configuration file ...                                   "
   RPCUSER=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w10 | head -n1)
   RPCPASSWORD=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w22 | head -n1)
   cat << EOF > $DATADIR_PATH/$CONFIG_FILENAME && pok || perr "Failed to write configuration to: $DATADIR_PATH/$CONFIG_FILENAME"
+## Generated by Veles Core script masternode.sh ${SCRIPT_VERSION}
 rpcuser=$RPCUSER
 rpcpassword=$RPCPASSWORD
 rpcport=$RPC_PORT
@@ -176,7 +212,7 @@ function create_key() {
     read -e COINKEY
   fi
   if [[ -z "$COINKEY" ]]; then
-    echo -en "${ST} Generating masternode private key ...                                 "
+    echo -en "${ST}   Generating masternode private key ...                               "
     ${INSTALL_PATH}/$COIN_DAEMON -daemon >/dev/null 2>&1
     sleep 30
     if [ -z "$(ps axo cmd:100 | grep $COIN_DAEMON)" ]; then
@@ -194,10 +230,10 @@ function create_key() {
 }
 
 function update_config() {
-  echo -en "${ST} Updating configuration file ...                                       "
+  echo -en "${ST}   Updating configuration file ...                                     "
   sed -i 's/daemon=1/daemon=0/' $DATADIR_PATH/$CONFIG_FILENAME
   cat << EOF >> $DATADIR_PATH/$CONFIG_FILENAME && pok || perr "Failed to update config file: $DATADIR_PATH/$CONFIG_FILENAME"
-## Config generated by Veles Core script masternode.sh v0.1.02
+## Generated by Veles Core script masternode.sh ${SCRIPT_VERSION}
 logintimestamps=1
 maxconnections=256
 txindex=1
@@ -270,7 +306,7 @@ function print_success_screen() {
   fi
 }
 
-function install_daemon() {
+function configure_daemon() {
   create_user
   get_ip
   check_ufw
@@ -281,8 +317,28 @@ function install_masternode() {
   create_key
   update_config
   configure_systemd
-  start_systemd_service
+  start_service
  }
+
+function start_installation() {
+  echo -e "${ST} Starting ${COIN_NAME} installation..."
+  download_and_copy
+  configure_daemon 
+  install_masternode
+  print_success_screen
+  echo -e "\n${BGREEN}Congratulations, ${COIN_NAME} installation was successful.\n"
+}
+
+function start_update() {
+  echo -e "${ST} Starting ${COIN_NAME} update ..."
+  stop_service
+  download_and_copy
+  enable_reindex_next_start
+  start_service
+  disable_reindex_next_start
+  print_success_screen
+  echo -e "\n${BGREEN}Congratulations, ${COIN_NAME} update was successful.\n"
+}
 
 
 ##### Main #####
@@ -293,10 +349,4 @@ else
   ARG1=""
 fi
 
-check_system
-download_node
-install_daemon 
-install_masternode
-print_success_screen
-
-echo -e "\n${BGREEN}Congratulations, installation was successful.\n"
+check_installation
