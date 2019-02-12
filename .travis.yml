@@ -9,28 +9,31 @@ jobs:
     - stage: test
       name: 'Ubuntu [xenial]  [GOAL: install, update]'
       script:
-         - make test
+         - travis_retry sudo make test_install && sudo make test_install
     - stage: test
-      name: 'Debian [latest]  [GOAL: install, update]'
-      #before_install:
-      #  - sudo docker pull debian:latest
+      name: 'Linux Mint [latest]  [GOAL: install]'
       script:
-         # Run tests in Container
-         - sudo docker run --rm=true -v `pwd`:/veles-masternode:rw debian:latest /bin/bash -c "apt-get update ; apt-get install -q -y wget make procps systemd python ; cd /veles-masternode/; make test_as_root"
+         - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw vcatechnology/linux-mint /bin/bash -c "apt-get update ; apt-get install -q -y wget make procps python ; cd /veles-masternode/; make docker_test_install"
+    - stage: test
+      name: 'Debian [stable]  [GOAL: install]'
+      script:
+         - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw debian:latest /bin/bash -c "apt-get update ; apt-get install -q -y wget make procps python curl net-tools ; cd /veles-masternode/; make docker_test_install"
     - stage: test
       name: 'CentOS [latest]  [GOAL: install, update]'
-      #before_install:
-      #  - sudo docker pull centos:latest
       script:
-         # Run tests in Container
-         - sudo docker run --rm=true -v `pwd`:/veles-masternode:rw centos:latest /bin/bash -c "yum -y install make wget python ; cd /veles-masternode/; make test_as_root"
+         - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw centos:latest /bin/bash -c "yum -y install make wget python ; cd /veles-masternode/; make docker_test_install && make test_install"
     - stage: test
-      name: 'Gentoo [latest]  [GOAL: install, update]'
-      #before_install:
-      #  - sudo docker pull gentoo/stage3-amd64
+      name: 'Gentoo [stage3]  [GOAL: install]'
       script:
-         # Run tests in Container
-         - sudo docker run --rm=true -v `pwd`:/veles-masternode:rw gentoo/stage3-amd64 /bin/bash -c "cd /veles-masternode/; make test_as_root"
+         - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw gentoo/stage3-amd64 /bin/bash -c "cd /veles-masternode/; make docker_test_install"
+    - stage: test
+      name: '[ experimental ] Fedora [latest]  [GOAL: install]'
+      script:
+         - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw fedora:latest /bin/bash -c "yum -y install make wget procps python ; cd /veles-masternode/; make docker_test_install"
+    - stage: test
+      name: '[ experimental ] OpenSUSE [leap]  [GOAL: install]'
+      script:
+         - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw opensuse/leap /bin/bash -c "zypper --non-interactive install make wget tar gzip python curl ; groupadd mail ; cd /veles-masternode/; make docker_test_install"
 
 
 
