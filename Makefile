@@ -8,7 +8,7 @@ test_install:
 	./masternode.sh --nonint
 	@echo '[test_install] Done: Masternode script finished with success.'
 	@echo -n '[test_install] Checking whether Veles Core daemon is running ... '
-	@ps aux | grep -v grep | grep velesd && echo 'success' || exit 1
+	@ps aux | grep -v grep | grep velesd > /dev/null && echo 'success' || exit 1
 
 docker_test_install:
 	

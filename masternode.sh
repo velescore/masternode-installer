@@ -330,16 +330,17 @@ function print_logo() {
   echo -e ' ____   ____     .__                _________                       
 _\___\_/___/____ |  |   ____   _____\_   ___ \  ___________   ____  
 \___________/__ \|  | _/ __ \ /  ___/    \  \/ /  _ \_  __ \_/ __ \ 
-/\ \  Y  /\  ___/|  |_\  ___/ \___ \\     \___(  <_> )  | \/\  ___/ 
-\ \ \___/  \___  >____/\___  >____  >\______  /\____/|__|    \___  >
- / / __  ___ ___   ____ ______ ____ ___   _| /_ ____   ___   ____
-/ / /  |/  // _ | / __//_  __// __// _ \ / |/ // __ \ / _ \ / __/
-\/ / /|_/ // __ |_\ \   / /  / _/ / , _//    // /_/ // // // _/  
+   \  Y  /\  ___/|  |_\  ___/ \___ \\     \___(  <_> )  | \/\  ___/ 
+_|\ \___/  \___  >____/\___  >____  >\______  /\____/|__|    \___  >
+_  / __  ___ ___   ____ ______ ____ ___   _| /_ ____   ___   ____
+ |/ /  |/  // _ | / __//_  __// __// _ \ / |/ // __ \ / _ \ / __/
+   / /|_/ // __ |_\ \   / /  / _/ / , _//    // /_/ // // // _/  
   /_/  /_//_/ |_|___/  /_/  /___//_/|_|/_/|_/ \____//____//___/  
   '
 }
 
 function print_install_notice() {
+  echo -e "${ST} ${BGREEN}Done.${NC}\n"
   print_installed_version
   echo -e "\n$COIN_NAME Masternode is up and running listening on port ${BYELLOW}$COIN_PORT${NC}."
   echo -e "Configuration file is: ${BYELLOW}$DATADIR_PATH/$CONFIG_FILENAME${NC}"
@@ -349,7 +350,7 @@ function print_install_notice() {
 }
 
 function print_update_notice() {
-  echo -e "${ST} ${BGREEN}Done.${NC}"
+  echo -e "${ST} ${BGREEN}Done.${NC}\n"
   print_installed_version
   echo -e "\n$COIN_NAME Masternode is up and running on the latest offical version."
   print_usage_notice
@@ -382,7 +383,6 @@ function install_masternode() {
  }
 
 function start_installation() {
-  print_logo
   echo -e "${ST} Starting ${COIN_NAME} installation..."
   download_and_copy
   configure_daemon 
@@ -393,7 +393,6 @@ function start_installation() {
 }
 
 function start_update() {
-  print_logo
   echo -e "${ST} Starting ${COIN_NAME} update ..."
   stop_service
   download_and_copy
@@ -421,4 +420,5 @@ if [ "${ARG1}" == "--nonint" ]; then
   KEY_GEN_TIMEOUT=$((KEY_GEN_TIMEOUT * 2))
 fi
 
+print_logo
 check_installation
