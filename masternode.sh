@@ -337,7 +337,6 @@ function print_logo() {
 }
 
 function print_install_notice() {
-  print_logo
   print_installed_version
   echo -e "\n$COIN_NAME Masternode is up and running listening on port ${BYELLOW}$COIN_PORT${NC}."
   echo -e "Configuration file is: ${BYELLOW}$DATADIR_PATH/$CONFIG_FILENAME${NC}"
@@ -347,7 +346,7 @@ function print_install_notice() {
 }
 
 function print_update_notice() {
-  print_logo
+  echo -e "${ST} ${BGREEN}Done.${NC}"
   print_installed_version
   echo -e "\n$COIN_NAME Masternode is up and running on the latest offical version."
   print_usage_notice
@@ -380,6 +379,7 @@ function install_masternode() {
  }
 
 function start_installation() {
+  print_logo
   echo -e "${ST} Starting ${COIN_NAME} installation..."
   download_and_copy
   configure_daemon 
@@ -390,6 +390,7 @@ function start_installation() {
 }
 
 function start_update() {
+  print_logo
   echo -e "${ST} Starting ${COIN_NAME} update ..."
   stop_service
   download_and_copy
