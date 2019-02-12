@@ -341,14 +341,23 @@ function print_install_notice() {
   print_installed_version
   echo -e "\n$COIN_NAME Masternode is up and running listening on port ${BYELLOW}$COIN_PORT${NC}."
   echo -e "Configuration file is: ${BYELLOW}$DATADIR_PATH/$CONFIG_FILENAME${NC}"
-  echo -e "Start: ${BYELLOW}systemctl start ${COIN_NAME_SHORT}.service${NC}"
-  echo -e "Stop: ${BYELLOW}systemctl stop ${COIN_NAME_SHORT}.service${NC}"
   echo -e "VPS_IP:PORT ${BYELLOW}$NODEIP:$COIN_PORT${NC}"
   echo -e "MASTERNODE PRIVATEKEY is: ${BYELLOW}$COINKEY${NC}"
+  print_usage_notice
+}
+
+function print_update_notice() {
+  print_logo
+  print_installed_version
+  echo -e "\n$COIN_NAME Masternode is up and running on the latest offical version."
+  print_usage_notice
 }
 
 function print_usage_notice() {
-  echo -e "Please check ${BYELLOW}${COIN_NAME_SHORT}${NC} daemon is running with the following command: ${BYELLOW}systemctl status ${COIN_NAME_SHORT}.service${NC}"
+  echo -e "Start: ${BYELLOW}systemctl start ${COIN_NAME_SHORT}.service${NC}"
+  echo -e "Stop: ${BYELLOW}systemctl stop ${COIN_NAME_SHORT}.service${NC}"
+  echo -e "You can always check whether ${BYELLOW}${COIN_NAME_SHORT}${NC} daemon is running "
+  echo -e "with the following command: ${BYELLOW}systemctl status ${COIN_NAME_SHORT}.service${NC}"
   echo -e "Use ${BYELLOW}${COIN_CLI} masternode status${NC} to check your MN."
   echo -e "For help join discord ${RED}https://discord.gg/P528fGg${NC} ..."
   if [[ -n $SENTINEL_REPO  ]]; then
@@ -368,7 +377,6 @@ function configure_daemon() {
 function install_masternode() {
   create_key
   update_config
-  start_service
  }
 
 function start_installation() {
@@ -376,8 +384,8 @@ function start_installation() {
   download_and_copy
   configure_daemon 
   install_masternode
+  start_service
   print_install_notice
-  print_usage_notice
   echo -e "\n${BGREEN}Congratulations, ${COIN_NAME} has been installed successfuly.\n"
 }
 
@@ -388,7 +396,7 @@ function start_update() {
   enable_reindex_next_start
   start_service
   disable_reindex_next_start
-  print_usage_notice
+  print_update_notice
   echo -e "\n${BGREEN}Congratulations, ${COIN_NAME} has been updated successfuly.\n"
 }
 
