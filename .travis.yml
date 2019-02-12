@@ -30,10 +30,10 @@ jobs:
       name: '[ experimental ] Fedora [latest]  [GOAL: install]'
       script:
          - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw fedora:latest /bin/bash -c "yum -y install make wget procps python ; cd /veles-masternode/; make docker_test_install"
-    - stage: test
-      name: '[ experimental ] OpenSUSE [leap]  [GOAL: install]'
-      script:
-         - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw opensuse/leap /bin/bash -c "zypper --non-interactive install make wget tar gzip python curl ; groupadd mail ; cd /veles-masternode/; make docker_test_install"
+    #- stage: test
+    #  name: '[ experimental ] OpenSUSE [leap]  [GOAL: install]'
+    #  script:
+    #     - travis_retry sudo docker run --rm=true -v `pwd`:/veles-masternode:rw opensuse/leap /bin/bash -c "zypper --non-interactive install make wget tar gzip python curl ; groupadd mail ; cd /veles-masternode/; make docker_test_install"
 
 
 
