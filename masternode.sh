@@ -25,7 +25,7 @@ START_STOP_RETRY_TIMEOUT=5
 KEY_GEN_TIMEOUT=15
 
 # Autodetection
-NODEIP=$(curl -s4 api.ipify.org)
+NODEIP=$(curl -s api.ipify.org)
 NEED_REINDEX=""
 
 # Constatnts
@@ -391,32 +391,34 @@ function get_ip() {
   debug_info=''
 
   if [[ -n $HAS_IP ]]; then
-    ifaces=$(ip -o link |awk '{gsub( ":", "" ); print $2}')
-    debug_info="ifconfig: '"$(ip link)"'"
+    ifaces=$(ip -o link | awk '!/lo/ {gsub( /\:/, ""); print $2}')
+    debug_info="ip -o link: '"$(ip -o link)"'"
   elif [[ -n $HAS_IFCONFIG ]]; then
     ifaces=$(ifconfig -s | awk '!/Kernel|Iface|lo/ {print $1," "}')
-    debug_info="ifconfig: '"$(ifconfig)"'"
-  else
-    ifaces=$(netstat -i | awk '!/Kernel|Iface|lo/ {print $1," "}')  # dependencies has been asserted
+    debug_info="ifconfig -s: '"$(ifconfig)"'"
+  else # dependencies has been asserted earlier
+    ifaces=$(netstat -i | awk '!/Kernel|Iface|lo/ {print $1," "}')
     debug_info="netstat -i: '"$(netstat -i)"'"
   fi
 
   # Check whether we have interface list
-  if [[ -n "${ifaces}" ]]; then
+  if [[ -n $ifaces ]]; then
     for iface in $ifaces
     do
-      NODE_IPS+=($(curl --interface $iface --connect-timeout 2 -s4 api.ipify.org))
+      # some docker interfaces has @ in them, like eth0@if5, curl needs iface name cleaned up
+      NODE_IPS+=($(curl --interface $(echo $iface | awk -F@ '{print $1}') -s api.ipify.org))
     done
   else
     pwarn "Failed to obtain network interface list, using the first available
 external IP address"
-      NODE_IPS+=($(curl --connect-timeout 2 -s4 api.ipify.org))
+    NODE_IPS+=($(curl -s api.ipify.org))
   fi
 
   # Check whether we have more than one IP
   if [ ${#NODE_IPS[@]} -gt 1 ]; then
     if [ $ARG1 == '--nonint' ]; then
-      pwarn "More than one IPv4 detected but running in non-interactive mode, using the first one ..."
+      pwarn "More than one IPv4 detected but running in non-interactive mode, \nusing the first one: ${NODE_IPS[0]}"
+      NODEIP=${NODE_IPS[0]}
     else
       echo -e "${GREEN}More than one IPv4 detected. Please type 0 to use the first IP, 1 for the second and so on...${NC}"
       INDEX=0
@@ -432,17 +434,24 @@ external IP address"
     NODEIP=${NODE_IPS[0]}
   fi
 
-  # Make sure we have IP address by now
+  # Make sure we have IP address by now, one more try without interface parameter and throw error
   if ! [[ -n "${NODEIP}" ]]; then
-    if [ $ARG1 == '--nonint' ]; then
-      perr "Failed to detect external IP address and can't ask for it in non-interactive mode\n
-please include following information with your bug report:
-HAS_IP: ${HAS_IP}, HAS_IFCONFIG: ${HAS_IFCONFIG}, HAS_NETSTAT: ${HAS_NETSTAT}, DEBUG_DUMP:\n'${debug_info}'"
-    else
-      pwarn "Failed to detect external IP address, please check with whatsmyip.org
-${YELLOW}or similar service, enter your IP address manually and press Enter:"
-      read -n NODEIP
-      [[ -n ${NODEIP} ]] || perr "You have not entered your IP adress, please run the script again \nand reenter your IP address."
+    NODEIP=$(curl -s api.ipify.org)
+    if [ ${#NODE_IPS[@]} -gt 1 ] && [[ -n "${NODEIP}" ]]; then
+      pwarn "More than one network interface detected but succeeded to obtain only one IPv4: ${NODEIP}"
+    fi
+
+    if ! [[ -n "${NODEIP}" ]]; then
+      if [ $ARG1 == '--nonint' ]; then
+        perr "Failed to detect external IP address and can't ask for it in non-interactive mode\n
+  please include following information with your bug report:
+  HAS_IP: ${HAS_IP}, HAS_IFCONFIG: ${HAS_IFCONFIG}, HAS_NETSTAT: ${HAS_NETSTAT}, IFACES: ${ifaces}, DEBUG_DUMP:\n'${debug_info}'"
+      else
+        pwarn "Failed to detect external IP address, please check with whatsmyip.org
+  ${YELLOW}or similar service, enter your IP address manually and press Enter:"
+        read -n NODEIP
+        [[ -n ${NODEIP} ]] || perr "You have not entered your IP adress, please run the script again \nand reenter your IP address."
+      fi
     fi
   fi
 }
