@@ -6,9 +6,9 @@ Veles Masternode Installer
 Official installer script for Veles Masternodes.
 
 ## Usage
-The installation / update will start directly after running the following command as **root**:
+The installation / update will start directly when running following command as **root**:
 ```bash
-sudo source <(curl -s https://raw.githubusercontent.com/Velescore/veles-masternode-install/master/masternode.sh)
+source <(curl -s https://raw.githubusercontent.com/Velescore/veles-masternode-install/master/masternode.sh)
 ```
 
 Detailed tutorial can be found on the following page in Veles Core Wiki:
