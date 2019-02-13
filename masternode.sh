@@ -66,7 +66,7 @@ function perr() {
 }
 
 function pwarn() {
-  echo -e "\n${BYELLOW} ☢ ${BYELLOW}Warning: ${1}${NC}
+  echo -e "\n${BYELLOW} ☢ Warning: ${YELLOW}${1}${NC}
                                                                           " # so that next OK or !! gets properly aligned
 }
 
@@ -94,43 +94,44 @@ function perr_depend()
   errline2=${errline2}"\n${RED}After installing required package please run this script again."
 
   echo -e "\n${BRED}Error:${RED} ${errline1}\n\n${RED}${errline2}\n\n${BRED}Done: The installation has been terminated.${NC}"
+  exit 1
 }
 
 function check_dependencies() {
-  apt-get --version &> /dev/null   && HAS_APTGET=1     || HAS_APTGET=''
-  yum --version &> /dev/null       && HAS_YUM=1        || HAS_YUM=''
-  emerge --version &> /dev/null    && HAS_EMERGE=1     || HAS_EMERGE=''
-  equo --version &> /dev/null      && HAS_EQUO=1       || HAS_EQUO=''
-  awk --version &> /dev/null       && HAS_AWK=1        || HAS_AWK=''
-  sed --version &> /dev/null       && HAS_SED=1        || HAS_SED=''
-  ifconfig --version &> /dev/null  && HAS_IFCONFIG=1   || HAS_IFCONFIG=''
-  ip -V &> /dev/null               && HAS_IP=1         || HAS_IP=''
-  netstat --version &> /dev/null   && HAS_NETSTAT=1    || HAS_NETSTAT=''
-  basename --version &> /dev/null  && HAS_BASENAME=1   || HAS_BASENAME=''
-  wget --version &> /dev/null      && HAS_WGET=1       || HAS_WGET=''
-  curl --version &> /dev/null      && HAS_CURL=1       || HAS_CURL=''
-  gzip --version &> /dev/null      && HAS_GZIP=1       || HAS_GZIP=''
-  tar --version &> /dev/null       && HAS_TAR=1        || HAS_TAR==''
-  useradd -h &> /dev/null          && HAS_USERADD=1    || HAS_USERADD==''
-  systemctl --version &> /dev/null && HAS_SYSTEMCTL==1 || HAS_SYSTEMCTL=''
+  command -v apt-get >/dev/null 2>&1    && HAS_APTGET=1     || HAS_APTGET=''
+  command -v yum >/dev/null 2>&1        && HAS_YUM=1        || HAS_YUM=''
+  command -v emerge >/dev/null 2>&1     && HAS_EMERGE=1     || HAS_EMERGE=''
+  command -v equo >/dev/null 2>&1       && HAS_EQUO=1       || HAS_EQUO=''
+  command -v awk >/dev/null 2>&1        && HAS_AWK=1        || HAS_AWK=''
+  command -v sed >/dev/null 2>&1        && HAS_SED=1        || HAS_SED=''
+  command -v ifconfig >/dev/null 2>&1   && HAS_IFCONFIG=1   || HAS_IFCONFIG=''
+  command -v ip >/dev/null 2>&1         && HAS_IP=1         || HAS_IP=''
+  command -v netstat >/dev/null 2>&1    && HAS_NETSTAT=1    || HAS_NETSTAT=''
+  command -v basename >/dev/null 2>&1   && HAS_BASENAME=1   || HAS_BASENAME=''
+  command -v wget >/dev/null 2>&1       && HAS_WGET=1       || HAS_WGET=''
+  command -v curl >/dev/null 2>&1       && HAS_CURL=1       || HAS_CURL=''
+  command -v gzip >/dev/null 2>&1       && HAS_GZIP=1       || HAS_GZIP=''
+  command -v tar >/dev/null 2>&1        && HAS_TAR=1        || HAS_TAR==''
+  command -v useradd -h >/dev/null 2>&1 && HAS_USERADD=1    || HAS_USERADD==''
+  command -v systemctl >/dev/null 2>&1  && HAS_SYSTEMCTL==1 || HAS_SYSTEMCTL=''
 }
 
 function assert_common_dependencies() {
-  uname -a | grep Linux &> /dev/null || perr "Sorry, only Linux kernel is currently supported by this script."
-  [[ -n HAS_SYSTEMCTL ]] || perr "Only distributions with ${BRED}systemd${RED} are currently supported.\n${RED}Please upgrade your init system to systemd or install your masternode manually."
-  [[ -n HAS_WGET ]] || perr_depend wget
-  [[ -n HAS_TAR ]] || perr_depend tar
-  [[ -n HAS_GZIP ]] || perr_depend gzip
+  uname -a | grep Linux >/dev/null 2>&1 || perr "Sorry, only Linux kernel is currently supported by this script."
+  [[ -n $HAS_SYSTEMCTL ]] || perr "Only distributions with ${BRED}systemd${RED} are currently supported.\n${RED}Please upgrade your init system to systemd or install your masternode manually."
+  [[ -n $HAS_WGET ]] || perr_depend wget
+  [[ -n $HAS_TAR ]] || perr_depend tar
+  [[ -n $HAS_GZIP ]] || perr_depend gzip
 }
 
 function assert_install_dependencies() {
   echo -en "${ST}   Checking dependencies ...                                           "
   check_dependencies
   assert_common_dependencies
-  [[ -n HAS_CURL ]] || perr_depend "curl"
-  [[ -n HAS_AWK ]] || perr_depend "awk"
-  [[ -n HAS_IP ]] || [[ -n HAS_IFCONFIG ]] || [[ -n HAS_NETSTAT ]] || perr_depend "ip"
-  [[ -n HAS_USERADD ]] || perr_depend "useradd"
+  [[ -n $HAS_CURL ]] || perr_depend "curl"
+  [[ -n $HAS_AWK ]] || perr_depend "awk"
+  [[ -n $HAS_IP ]] || [[ -n $HAS_IFCONFIG ]] || [[ -n $HAS_NETSTAT ]] || perr_depend "ip"
+  [[ -n $HAS_USERADD ]] || perr_depend "useradd"
   pok
 }
 
@@ -138,7 +139,7 @@ function assert_update_dependencies() {
   echo -en "${ST}   Checking dependencies ...                                           "
   check_dependencies
   assert_common_dependencies
-  [[ -n HAS_BASENAME ]] || [[ -n HAS_AWK ]] || perr_depend basename
+  [[ -n $HAS_BASENAME ]] || [[ -n $HAS_AWK ]] || perr_depend basename
   pok
 }
 
@@ -204,7 +205,7 @@ function download_and_copy() {
   pok
 
   rm -rf $TEMP_PATH >/dev/null 2>&1 || pwarn "Failed to remove temporary directory: ${TEMP_PATH}"
-  cd - &> /dev/null
+  cd - >/dev/null 2>&1
 }
 
 function create_user() {
@@ -387,20 +388,32 @@ EOF
 
 function get_ip() {
   declare -a NODE_IPS
+  debug_info=''
 
-  if [[ -n HAS_IFCONFIG ]]; then  # most reliable output, used as first option
-    ifaces=$(ifconfig | grep flags | xargs -L1 echo | awk '{print $1}' | sed 's\:\\g')
-  elif [[ -n HAS_IP ]]; then
-    ifaces=$(ip link | grep ': <' | awk '{print $2}' | sed 's\:\\g')
+  if [[ -n $HAS_IP ]]; then
+    ifaces=$(ip -o link |awk '{gsub( ":", "" ); print $2}')
+    debug_info="ifconfig: '"$(ip link)"'"
+  elif [[ -n $HAS_IFCONFIG ]]; then
+    ifaces=$(ifconfig -s | awk '!/Kernel|Iface|lo/ {print $1," "}')
+    debug_info="ifconfig: '"$(ifconfig)"'"
   else
     ifaces=$(netstat -i | awk '!/Kernel|Iface|lo/ {print $1," "}')  # dependencies has been asserted
+    debug_info="netstat -i: '"$(netstat -i)"'"
   fi
 
-  for iface in $ifaces
-  do
-    NODE_IPS+=($(curl --interface $iface --connect-timeout 2 -s4 api.ipify.org))
-  done
+  # Check whether we have interface list
+  if [[ -n "${ifaces}" ]]; then
+    for iface in $ifaces
+    do
+      NODE_IPS+=($(curl --interface $iface --connect-timeout 2 -s4 api.ipify.org))
+    done
+  else
+    pwarn "Failed to obtain network interface list, using the first available
+external IP address"
+      NODE_IPS+=($(curl --connect-timeout 2 -s4 api.ipify.org))
+  fi
 
+  # Check whether we have more than one IP
   if [ ${#NODE_IPS[@]} -gt 1 ]; then
     if [ $ARG1 == '--nonint' ]; then
       pwarn "More than one IPv4 detected but running in non-interactive mode, using the first one ..."
@@ -417,6 +430,20 @@ function get_ip() {
     fi
   else
     NODEIP=${NODE_IPS[0]}
+  fi
+
+  # Make sure we have IP address by now
+  if ! [[ -n "${NODEIP}" ]]; then
+    if [ $ARG1 == '--nonint' ]; then
+      perr "Failed to detect external IP address and can't ask for it in non-interactive mode\n
+please include following information with your bug report:
+HAS_IP: ${HAS_IP}, HAS_IFCONFIG: ${HAS_IFCONFIG}, HAS_NETSTAT: ${HAS_NETSTAT}, DEBUG_DUMP:\n'${debug_info}'"
+    else
+      pwarn "Failed to detect external IP address, please check with whatsmyip.org
+${YELLOW}or similar service, enter your IP address manually and press Enter:"
+      read -n NODEIP
+      [[ -n ${NODEIP} ]] || perr "You have not entered your IP adress, please run the script again \nand reenter your IP address."
+    fi
   fi
 }
 
