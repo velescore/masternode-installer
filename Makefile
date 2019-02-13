@@ -21,29 +21,28 @@ docker_test_install:
 test_dependencies:
 	@echo '[test_dependencies] Starting the test ...'
 	@echo -n "Checking whether ifconfig command is present ... "
-	@ifconfig --version &> /dev/null  && echo "yes" || echo "no"
+	@command -v ifconfig >/dev/null 2>&1  && echo "yes" || echo "no"
 	@echo -n "Checking whether ip command is present ... "
-	@ip -V &> /dev/null  && echo "yes" || echo "no"
+	@command -v ip >/dev/null 2>&1  && echo "yes" || echo "no"
 	@echo -n "Checking whether netstat command is present ... "
-	@netstat --version &> /dev/null  && echo "yes" || echo "no"
+	@command -v netstat >/dev/null 2>&1  && echo "yes" || echo "no"
 	@echo -n "Checking whether curl command is present ... "
-	@curl --version &> /dev/null  && echo "yes" || echo "no"
+	@command -v curl >/dev/null 2>&1  && echo "yes" || echo "no"
 	@echo -n "Checking whether wget command is present ... "
-	@wget --version &> /dev/null  && echo "yes" || echo "no"
+	@command -v wget >/dev/null 2>&1  && echo "yes" || echo "no"
 	@echo -n "Checking whether sed command is present ... "
-	@sed --version &> /dev/null  && echo "yes" || echo "no"
+	@command -v sed >/dev/null 2>&1  && echo "yes" || echo "no"
 	@echo -n "Checking whether awk command is present ... "
-	@awk --version &> /dev/null  && echo "yes" || echo "no"
+	@command -v awk >/dev/null 2>&1  && echo "yes" || echo "no"
 	@echo -n "Checking whether basename command is present ... "
-	@basename --version &> /dev/null  && echo "yes" || echo "no"
+	@command -v basename >/dev/null 2>&1  && echo "yes" || echo "no"
 	@echo -n "Checking whether apt-get package manager is present ... "
-	@apt-get --version &> /dev/null  && echo "yes" || echo "no"
+	@command -v apt-get >/dev/null 2>&1  && echo "yes" || echo "no"
 	@echo -n "Checking whether yum package manager is present ... "
-	@yum --version &> /dev/null  && echo "yes" || echo "no"
+	@command -v yum >/dev/null 2>&1  && echo "yes" || echo "no"
 	@echo -n "Checking whether systemd is installed ... "
-	@systemctl --version &> /dev/null  && echo 'yes' || (echo "no, but is required!" ; exit 1)
+	@command -v systemctl >/dev/null 2>&1  && echo 'yes' || (echo "no, but is required!" ; exit 1)
 	@echo -e "[test_dependencies] Done [success] \n"
-
 
 get_assertion_tool:
 	@echo '[test] Installing assertion toolkit ...'
