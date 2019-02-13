@@ -4,6 +4,7 @@ SCRIPT_URL=https://raw.githubusercontent.com/Velescore/veles-masternode-install/
 DAEMON_NAME=velesd
 
 test_install:
+	@echo
 	make test_dependencies
 	@echo -n '[test_install] Running the masternode script ...'
 	./masternode.sh --nonint
@@ -13,8 +14,8 @@ test_install:
 	@echo -e "[test_install] Done [success] \n"
 
 docker_test_install:
-	@make get_docker_systemd
-	@echo '[docker_test_install] Starting the test ...'
+	@make install_docker_systemd
+	@echo -e "[docker_test_install] Starting the test ... "
 	@make test_install
 	@echo -e "[docker_test_install] Done [success] \n"
 
@@ -44,12 +45,12 @@ test_dependencies:
 	@command -v systemctl >/dev/null 2>&1  && echo 'yes' || (echo "no, but is required!" ; exit 1)
 	@echo -e "[test_dependencies] Done [success] \n"
 
-get_assertion_tool:
+install_assertion_tool:
 	@echo '[test] Installing assertion toolkit ...'
 	@[ -f assert.sh ] || wget --quiet $(ASSERT_TOOL_URL) || exit 1
 	@[ -x assert.sh ] || chmod +x assert.sh || exit 1
 
-get_docker_systemd:
+install_docker_systemd:
 	@echo '[test] Installing custom Docker systemd ...'
 	@[ -f systemctl.py ] || wget --quiet $(SYSD_TOOL_URL) || exit 1
 	@[ -x systemctl.py ] || chmod +x systemctl.py || exit 1
