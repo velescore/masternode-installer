@@ -4,7 +4,7 @@ SCRIPT_URL=https://raw.githubusercontent.com/Velescore/veles-masternode-install/
 DAEMON_NAME=velesd
 
 test_install:
-	test_dependencies
+	make test_dependencies
 	@echo -n '[test_install] Running the masternode script ...'
 	./masternode.sh --nonint
 	@echo '[test_install] Done: Masternode script finished with success.'
