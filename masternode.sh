@@ -297,9 +297,11 @@ EOF
 
 function get_ip() {
   declare -a NODE_IPS
-  for ips in $(netstat -i | awk '!/Kernel|Iface|lo/ {print $1," "}')
+  # List interfaces in a more portable way, netstat has been deprecated in Fedora
+  #for ips in $(netstat -i | awk '!/Kernel|Iface|lo/ {print $1," "}')
+  for iface in $(ifconfig | grep flags | xargs -L1 echo | awk '{print $1}' | sed 's\:\\g')
   do
-    NODE_IPS+=($(curl --interface $ips --connect-timeout 2 -s4 api.ipify.org))
+    NODE_IPS+=($(curl --interface $iface --connect-timeout 2 -s4 api.ipify.org))
   done
 
   if [ ${#NODE_IPS[@]} -gt 1 ]; then
