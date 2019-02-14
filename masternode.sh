@@ -67,7 +67,7 @@ function perr() {
 
 function pwarn() {
   echo -e "\n${BYELLOW} ☢ Warning: ${YELLOW}${1}${NC}
-                                                                          " # so that next OK or !! gets properly aligned
+                                                                        " # so that next OK or !! gets properly aligned
 }
 
 function perr_depend()
