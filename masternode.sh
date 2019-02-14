@@ -1,5 +1,5 @@
 #!/bin/bash
-# version 	v0.1.03
+# version 	v1.1.03
 # description:	Installation of an Veles masternode
 # website:      https://veles.network
 # twitter:      https://twitter.com/mdfkbtc
@@ -37,7 +37,7 @@ APT_PACKAGES=(["ps"]="procps" ["ifconfig"]="net-tools") # net-tools will once be
 YUM_PACKAGES=(["ps"]="procps" ["ip"]="iproute")
 EMERGE_PACKAGES=(["ps"]="procps" ["ip"]="iproute2")
 EQUO_PACKAGES=(["ps"]="procps" ["ip"]="iproute2")
-SCRIPT_VERSION='v0.1.04'
+SCRIPT_VERSION='v1.1.03'
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
