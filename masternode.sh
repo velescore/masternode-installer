@@ -1,5 +1,5 @@
 #!/bin/bash
-# version 	v0.1.03
+# version 	v1.1.03
 # description:	Installation of an Veles masternode
 # website:      https://veles.network
 # twitter:      https://twitter.com/mdfkbtc
@@ -25,11 +25,19 @@ START_STOP_RETRY_TIMEOUT=5
 KEY_GEN_TIMEOUT=15
 
 # Autodetection
-NODEIP=$(curl -s4 api.ipify.org)
+NODEIP=$(curl -s api.ipify.org)
 NEED_REINDEX=""
 
 # Constatnts
-SCRIPT_VERSION='v0.1.04'
+declare -A APT_PACKAGES
+declare -A YUM_PACKAGES
+declare -A EMERGE_PACKAGES
+declare -A EQUO_PACKAGES
+APT_PACKAGES=(["ps"]="procps" ["ifconfig"]="net-tools") # net-tools will once be deprecated on all distros, it's fallback for old systems
+YUM_PACKAGES=(["ps"]="procps" ["ip"]="iproute")
+EMERGE_PACKAGES=(["ps"]="procps" ["ip"]="iproute2")
+EQUO_PACKAGES=(["ps"]="procps" ["ip"]="iproute2")
+SCRIPT_VERSION='v1.1.03'
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -50,11 +58,89 @@ function pok() {
 function perr() {
   echo -e "${ERR}"
   if [ -z "${1}" ]; then
-    echo -e "\n${RED}Done: The installation has been terminated because an error has occured.${NC}"
+    echo -e "\n${BRED}Error:${RED} An unknown error has occured\n\n${BRED}Done: The installation has been terminated.${NC}"
   else
-    echo -e "\n${RED}Error: ${1}\nDone: The installation has been terminated.${NC}"
+    echo -e "\n${BRED}Error:${RED} ${1}\n\n${BRED}Done: The installation has been terminated.${NC}"
   fi
   exit 1
+}
+
+function pwarn() {
+  echo -e "\n${BYELLOW} ☢ Warning: ${YELLOW}${1}${NC}
+                                                                        " # so that next OK or !! gets properly aligned
+}
+
+function perr_depend()
+{
+  errline1="Required command ${YELLOW}${1}${RED} is not installed on your system."
+
+  if [[ -n $HAS_APTGET ]]; then 
+    install_cmd="apt-get install "$([[ -n ${APT_PACKAGES[${1}]} ]] && echo "${APT_PACKAGES[${1}]}" || echo "${1}")
+  elif [[ -n $HAS_YUM ]]; then
+    install_cmd="yum install "$([[ -n ${YUM_PACKAGES[${1}]} ]] && echo "${YUM_PACKAGES[${1}]}" || echo "${1}")
+  elif [[ -n $HAS_EMERGE ]]; then
+    install_cmd="emerge "$([[ -n ${EMERGE_PACKAGES[${1}]} ]] && echo "${EMERGE_PACKAGES[${1}]}" || echo "${1}")
+  elif [[ -n $HAS_EQUO ]]; then
+    install_cmd="emerge "$([[ -n ${EQUO_PACKAGES[${1}]} ]] && echo "${EQUO_PACKAGES[${1}]}" || echo "${1}")
+  else
+    install_cmd=''
+  fi
+
+  if [[ -n $install_cmd ]]; then
+    errline2="Please install it with command: ${BYELLOW}${install_cmd}"
+  else
+    errline2="Please install ${BYELLOW}${install_cmd}${RED} using your package manager"
+  fi
+  errline2=${errline2}"\n${RED}After installing required package please run this script again."
+
+  echo -e "\n${BRED}Error:${RED} ${errline1}\n\n${RED}${errline2}\n\n${BRED}Done: The installation has been terminated.${NC}"
+  exit 1
+}
+
+function check_dependencies() {
+  command -v apt-get >/dev/null 2>&1    && HAS_APTGET=1     || HAS_APTGET=''
+  command -v yum >/dev/null 2>&1        && HAS_YUM=1        || HAS_YUM=''
+  command -v emerge >/dev/null 2>&1     && HAS_EMERGE=1     || HAS_EMERGE=''
+  command -v equo >/dev/null 2>&1       && HAS_EQUO=1       || HAS_EQUO=''
+  command -v awk >/dev/null 2>&1        && HAS_AWK=1        || HAS_AWK=''
+  command -v sed >/dev/null 2>&1        && HAS_SED=1        || HAS_SED=''
+  command -v ifconfig >/dev/null 2>&1   && HAS_IFCONFIG=1   || HAS_IFCONFIG=''
+  command -v ip >/dev/null 2>&1         && HAS_IP=1         || HAS_IP=''
+  command -v netstat >/dev/null 2>&1    && HAS_NETSTAT=1    || HAS_NETSTAT=''
+  command -v basename >/dev/null 2>&1   && HAS_BASENAME=1   || HAS_BASENAME=''
+  command -v wget >/dev/null 2>&1       && HAS_WGET=1       || HAS_WGET=''
+  command -v curl >/dev/null 2>&1       && HAS_CURL=1       || HAS_CURL=''
+  command -v gzip >/dev/null 2>&1       && HAS_GZIP=1       || HAS_GZIP=''
+  command -v tar >/dev/null 2>&1        && HAS_TAR=1        || HAS_TAR==''
+  command -v useradd -h >/dev/null 2>&1 && HAS_USERADD=1    || HAS_USERADD==''
+  command -v systemctl >/dev/null 2>&1  && HAS_SYSTEMCTL==1 || HAS_SYSTEMCTL=''
+}
+
+function assert_common_dependencies() {
+  uname -a | grep Linux >/dev/null 2>&1 || perr "Sorry, only Linux kernel is currently supported by this script."
+  [[ -n $HAS_SYSTEMCTL ]] || perr "Only distributions with ${BRED}systemd${RED} are currently supported.\n${RED}Please upgrade your init system to systemd or install your masternode manually."
+  [[ -n $HAS_WGET ]] || perr_depend wget
+  [[ -n $HAS_TAR ]] || perr_depend tar
+  [[ -n $HAS_GZIP ]] || perr_depend gzip
+}
+
+function assert_install_dependencies() {
+  echo -en "${ST}   Checking dependencies ...                                           "
+  check_dependencies
+  assert_common_dependencies
+  [[ -n $HAS_CURL ]] || perr_depend "curl"
+  [[ -n $HAS_AWK ]] || perr_depend "awk"
+  [[ -n $HAS_IP ]] || [[ -n $HAS_IFCONFIG ]] || [[ -n $HAS_NETSTAT ]] || perr_depend "ip"
+  [[ -n $HAS_USERADD ]] || perr_depend "useradd"
+  pok
+}
+
+function assert_update_dependencies() {
+  echo -en "${ST}   Checking dependencies ...                                           "
+  check_dependencies
+  assert_common_dependencies
+  [[ -n $HAS_BASENAME ]] || [[ -n $HAS_AWK ]] || perr_depend basename
+  pok
 }
 
 function check_installation() {
@@ -85,7 +171,12 @@ function download_and_copy() {
   wget -q $COIN_TGZ_URL || perr "Failed to download installation archive"
 
   # Extract executables to the temporary directory
-  archive_name=$(echo $COIN_TGZ_URL | awk -F'/' '{print $NF}')
+  if [[ -n HAS_BASENAME ]]; then
+    archive_name=$(basename $COIN_TGZ_URL)
+  else
+    archive_name=$(echo $COIN_TGZ_URL | awk -F'/' '{print $NF}')  # fallback, has asserted in dependencies
+  fi
+
   tar xvzf $archive_name -C ${TEMP_PATH} >/dev/null 2>&1 || perr "Failed to extract installation archive ${archive_name}"
 
   # Check whether destination files are already installed
@@ -113,15 +204,15 @@ function download_and_copy() {
 
   pok
 
-  rm -rf $TEMP_PATH >/dev/null 2>&1 || echo -e "\n${BYELLOW} !   ${YELLOW}Warning: Failed to remove temporary directory: ${TEMP_PATH}${NC}\n"
-  cd -
+  rm -rf $TEMP_PATH >/dev/null 2>&1 || pwarn "Failed to remove temporary directory: ${TEMP_PATH}"
+  cd - >/dev/null 2>&1
 }
 
 function create_user() {
   echo -e "${ST}   Setting up user account ... "
   # our new mnode unpriv user acc is added
   if id "$USER" >/dev/null 2>&1; then
-    echo -e "\n${BYELLOW} !   ${BYELLOW}Warning: User account ${BYELLOW}${USER}${NC} already exists."                       
+    pwarn "User account ${BYELLOW}${USER}${NC} already exists."                       
   else
     echo -en "${ST}     Creating new user account ${YELLOW}${USER}${NC} ...                               "
     useradd -m $USER && pok || perr
@@ -186,7 +277,7 @@ function start_service() {
 
     # Try to launch again if waiting for too long
     if (( $tries % $START_STOP_RETRY_TIMEOUT == 0 )); then
-      echo -en "\n${BYELLOW} !   ${YELLOW}Warning: Service is starting up longer than usual, retrying ...     "
+      pwarn "Service is starting up longer than usual, retrying ...     "
       systemctl restart "${COIN_NAME_SHORT}.service" > /dev/null
     fi
   done
@@ -297,14 +388,37 @@ EOF
 
 function get_ip() {
   declare -a NODE_IPS
-  for ips in $(netstat -i | awk '!/Kernel|Iface|lo/ {print $1," "}')
-  do
-    NODE_IPS+=($(curl --interface $ips --connect-timeout 2 -s4 api.ipify.org))
-  done
+  debug_info=''
 
+  if [[ -n $HAS_IP ]]; then
+    ifaces=$(ip -o link | awk '!/lo/ {gsub( /\:/, ""); print $2}')
+    debug_info="ip -o link: '"$(ip -o link)"'"
+  elif [[ -n $HAS_IFCONFIG ]]; then
+    ifaces=$(ifconfig -s | awk '!/Kernel|Iface|lo/ {print $1," "}')
+    debug_info="ifconfig -s: '"$(ifconfig)"'"
+  else # dependencies has been asserted earlier
+    ifaces=$(netstat -i | awk '!/Kernel|Iface|lo/ {print $1," "}')
+    debug_info="netstat -i: '"$(netstat -i)"'"
+  fi
+
+  # Check whether we have interface list
+  if [[ -n $ifaces ]]; then
+    for iface in $ifaces
+    do
+      # some docker interfaces has @ in them, like eth0@if5, curl needs iface name cleaned up
+      NODE_IPS+=($(curl --interface $(echo $iface | awk -F@ '{print $1}') -s api.ipify.org))
+    done
+  else
+    pwarn "Failed to obtain network interface list, using the first available
+external IP address"
+    NODE_IPS+=($(curl -s api.ipify.org))
+  fi
+
+  # Check whether we have more than one IP
   if [ ${#NODE_IPS[@]} -gt 1 ]; then
     if [ $ARG1 == '--nonint' ]; then
-      echo -e "\n${BYELLOW} !   ${YELLOW}Warning: More than one IPv4 detected but running in non-interactive mode, using the first one ...${NC}\n"
+      pwarn "More than one IPv4 detected but running in non-interactive mode, \nusing the first one: ${NODE_IPS[0]}"
+      NODEIP=${NODE_IPS[0]}
     else
       echo -e "${GREEN}More than one IPv4 detected. Please type 0 to use the first IP, 1 for the second and so on...${NC}"
       INDEX=0
@@ -318,6 +432,27 @@ function get_ip() {
     fi
   else
     NODEIP=${NODE_IPS[0]}
+  fi
+
+  # Make sure we have IP address by now, one more try without interface parameter and throw error
+  if ! [[ -n "${NODEIP}" ]]; then
+    NODEIP=$(curl -s api.ipify.org)
+    if [ ${#NODE_IPS[@]} -gt 1 ] && [[ -n "${NODEIP}" ]]; then
+      pwarn "More than one network interface detected but succeeded to obtain only one IPv4: ${NODEIP}"
+    fi
+
+    if ! [[ -n "${NODEIP}" ]]; then
+      if [ $ARG1 == '--nonint' ]; then
+        perr "Failed to detect external IP address and can't ask for it in non-interactive mode\n
+  please include following information with your bug report:
+  HAS_IP: ${HAS_IP}, HAS_IFCONFIG: ${HAS_IFCONFIG}, HAS_NETSTAT: ${HAS_NETSTAT}, IFACES: ${ifaces}, DEBUG_DUMP:\n'${debug_info}'"
+      else
+        pwarn "Failed to detect external IP address, please check with whatsmyip.org
+  ${YELLOW}or similar service, enter your IP address manually and press Enter:"
+        read -n NODEIP
+        [[ -n ${NODEIP} ]] || perr "You have not entered your IP adress, please run the script again \nand reenter your IP address."
+      fi
+    fi
   fi
 }
 
@@ -364,8 +499,8 @@ function print_usage_notice() {
   echo -e "Use ${BYELLOW}${COIN_CLI} masternode status${NC} to check your MN."
   echo -e "For help join discord ${RED}https://discord.gg/P528fGg${NC} ..."
   if [[ -n $SENTINEL_REPO  ]]; then
-  echo -e "${BYELLOW}Sentinel${NC} is installed in ${RED}$DATADIR_PATH/sentinel${NC}"
-  echo -e "Sentinel logs is: ${BYELLOW}$DATADIR_PATH/sentinel.log${NC}"
+    echo -e "${BYELLOW}Sentinel${NC} is installed in ${RED}$DATADIR_PATH/sentinel${NC}"
+    echo -e "Sentinel logs is: ${BYELLOW}$DATADIR_PATH/sentinel.log${NC}"
   fi
 }
 
@@ -384,6 +519,7 @@ function install_masternode() {
 
 function start_installation() {
   echo -e "${ST} Starting ${COIN_NAME} installation..."
+  assert_install_dependencies
   download_and_copy
   configure_daemon 
   install_masternode
@@ -394,6 +530,7 @@ function start_installation() {
 
 function start_update() {
   echo -e "${ST} Starting ${COIN_NAME} update ..."
+  assert_update_dependencies
   stop_service
   download_and_copy
   enable_reindex_next_start
