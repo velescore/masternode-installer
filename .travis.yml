@@ -4,6 +4,15 @@ language: bash
 script: make test
 stages:
   - test
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key: $GH_TOKEN
+  file_glob: true
+  file:
+    - "masternode.sh"
+  on:
+    tags: true
 jobs:
   include:
     - stage: test
