@@ -6,12 +6,12 @@ stages:
   - test
 deploy:
   provider: releases
-  skip_cleanup: true
-  file_glob: true
-  api_key: "$GH_API_KEY"
-  file:
-    - "masternode.sh"
+  api_key:
+    secure: 
+szOlwUxLx2zZnDRm+XJshNGkV1JA78qqxPHNkikM82pBcCqpXyBVxUde4ikyUcq4m2RaqBMOqWSL1ki5qHg+Y2qR0q55DIkxCCH0JBcqRFlg9awlbPCvm//nj+a+BP51SySgD3MozmkqgjKz0fgMalL54ZHRgh7xFBLxLg0mjw15U/kjz4L/XoDKlCIeyIyyLMxzgqO7HFecpkS1G6JV+Hkmdk+ExAO5eeKdme6baMcXZJ28VsKCu9arIm/Rccadpwsng6neHM4sYo4Nd6raoFKoVcD646NZEU/f9xs3SFLEsSrziR3B6QcCApK0E9LxjOCUomwVk8xFXrfjD+zq9AwGtwmxmALnzcozzAQ5sB72nriF0gyWQcOaoxJnS47mVbONbU89TAxuyzg5tmdDaZ5Tu31FR6R9W1f4O9EBLzFu9rgMsM6zGLruCc2lMk0y5UduSbBmfR0cJvbNHuuc4n1F6dbBoDU9c9cnKfG6Etg4Em+B/VECgHUXieSUwL0k6yKcI9vluN9FTPgwV7uVVn+DUFGBAyPOgMbK91QiD249Q9owg0mnTfaDwAAptDCDP/5F1niHPEC1e2f00rdrnVDt8ohS1gypTKF2zWhIbj8fMmEAkzhVT0kmcUI6jZO4Z9VaLlY7ZFpVQzmMa6plWZKIswuX/jFu+/Ug/A/FUWc=
+  file: masternode.sh
   on:
+#    repo: AltcoinBaggins/veles-installer
     tags: true
 jobs:
   include:
