@@ -1,5 +1,5 @@
 #!/bin/bash
-# version 	v1.1.03
+# version 	v1.1.05-dev
 # description:	Installation of an Veles masternode
 # website:      https://veles.network
 # twitter:      https://twitter.com/mdfkbtc
@@ -27,6 +27,7 @@ KEY_GEN_TIMEOUT=15
 # Autodetection
 NODEIP=$(curl -s api.ipify.org)
 NEED_REINDEX=""
+MN_SUFFIX=""  # experimental
 
 # Constatnts
 declare -A APT_PACKAGES
@@ -37,7 +38,7 @@ APT_PACKAGES=(["ps"]="procps" ["ifconfig"]="net-tools") # net-tools will once be
 YUM_PACKAGES=(["ps"]="procps" ["ip"]="iproute")
 EMERGE_PACKAGES=(["ps"]="procps" ["ip"]="iproute2")
 EQUO_PACKAGES=(["ps"]="procps" ["ip"]="iproute2")
-SCRIPT_VERSION='v1.1.03'
+SCRIPT_VERSION='v1.1.05-dev'
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -381,6 +382,7 @@ listenonion=0
 masternode=1
 masternodeaddr=$NODEIP:$COIN_PORT
 masternodeprivkey=$COINKEY
+bind=$NODEIP
 EOF
   # Might be useful in the future:
   # bind=$NODEIP, externalip=$NODEIP:$COIN_PORT
@@ -542,11 +544,17 @@ function start_update() {
 
 
 ##### Main #####
-# Load ze args
+# Load ze args ... horrible or not ... free to improve args parsing and send a pull request, args not used in production env.
 if ! [ -z "$1" ]; then
   ARG1="${1}"
 else
   ARG1=""
+fi
+
+if ! [ -z "$2" ]; then
+  ARG2="${2}"
+else
+  ARG2=""
 fi
 
 if [ "${ARG1}" == "--nonint" ]; then
@@ -555,6 +563,14 @@ if [ "${ARG1}" == "--nonint" ]; then
   START_STOP_TIMEOUT=$((START_STOP_TIMEOUT * 2))
   START_STOP_RETRY_TIMEOUT=$((START_STOP_RETRY_TIMEOUT * 2))
   KEY_GEN_TIMEOUT=$((KEY_GEN_TIMEOUT * 2))
+fi
+
+if [ "${ARG1}" == "--suffix" ]; then
+  [[ -n $ARG2 ]] || perr "Option --suffix needs a value to be provided, eg. --suffix 2"
+  echo -e "\n[ $0: Using suffix ${ARG2} for current installation / update ]"
+  MN_SUFFIX="-${ARG2}"
+  COIN_NAME_SHORT+="${MN_SUFFIX}"
+  DATADIR_PATH='/home/veles/.${COIN_NAME_SHORT}'
 fi
 
 print_logo
