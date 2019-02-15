@@ -8,7 +8,8 @@ deploy:
   provider: releases
   skip_cleanup: true
   file_glob: true
-  api_key: $TOKEN
+  user: $GH_USER
+  password: $GH_PASSWD
   file:
     - "masternode.sh"
   on:
