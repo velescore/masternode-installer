@@ -7,7 +7,6 @@ stages:
 deploy:
   provider: releases
   skip_cleanup: true
-  api_key: $GH_TOKEN
   file_glob: true
   file:
     - "masternode.sh"
