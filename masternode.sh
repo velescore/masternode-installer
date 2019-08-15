@@ -1,5 +1,5 @@
 #!/bin/bash
-# version 	v1.1.03
+# version 	v1.1.04
 # description:	Installation of an Veles masternode
 # website:      https://veles.network
 # twitter:      https://twitter.com/mdfkbtc
@@ -15,7 +15,7 @@ DATADIR_PATH='/home/veles/.veles'
 COIN_DAEMON='velesd'
 COIN_CLI='veles-cli'
 INSTALL_PATH='/usr/local/bin'
-COIN_TGZ_URL='https://github.com/velescore/veles/releases/download/v0.18.0/velesLinux.tar.gz'
+COIN_TGZ_URL='https://github.com/velescore/veles/releases/download/v0.18.1/veles-0.18.1-generic-linux-amd64.tar.gz'
 COIN_NAME='Veles Core'
 COIN_NAME_SHORT='veles'
 COIN_PORT=21337
@@ -197,8 +197,8 @@ function download_and_copy() {
   fi
 
   # Copy the files to installation directory and ensure executable flags
-  cp "${TEMP_PATH}/${COIN_DAEMON}" "${INSTALL_PATH}/${COIN_DAEMON}" || "Failed to copy ${COIN_DAEMON} to ${INSTALL_PATH}"
-  cp "${TEMP_PATH}/${COIN_CLI}" "${INSTALL_PATH}/${COIN_CLI}" || "Failed to copy ${COIN_CLI} to ${INSTALL_PATH}"
+  cp "${TEMP_PATH}/veles-linux-amd64/${COIN_DAEMON}" "${INSTALL_PATH}/${COIN_DAEMON}" || "Failed to copy ${COIN_DAEMON} to ${INSTALL_PATH}"
+  cp "${TEMP_PATH}/veles-linux-amd64/${COIN_CLI}" "${INSTALL_PATH}/${COIN_CLI}" || "Failed to copy ${COIN_CLI} to ${INSTALL_PATH}"
   chmod +x "${INSTALL_PATH}/${COIN_DAEMON}" || "Failed to set exacutable flag for ${INSTALL_PATH}/${COIN_DAEMON}"
   chmod +x "${INSTALL_PATH}/${COIN_CLI}" || "Failed to set exacutable flag for ${INSTALL_PATH}/${COIN_CLI}"
 
