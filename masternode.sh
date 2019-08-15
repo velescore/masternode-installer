@@ -37,7 +37,7 @@ APT_PACKAGES=(["ps"]="procps" ["ifconfig"]="net-tools") # net-tools will once be
 YUM_PACKAGES=(["ps"]="procps" ["ip"]="iproute")
 EMERGE_PACKAGES=(["ps"]="procps" ["ip"]="iproute2")
 EQUO_PACKAGES=(["ps"]="procps" ["ip"]="iproute2")
-SCRIPT_VERSION='v1.1.03'
+SCRIPT_VERSION='v1.1.04-dev'
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -57,11 +57,8 @@ function pok() {
 
 function perr() {
   echo -e "${ERR}"
-  if [ -z "${1}" ]; then
-    echo -e "\n${BRED}Error:${RED} An unknown error has occured\n\n${BRED}Done: The installation has been terminated.${NC}"
-  else
-    echo -e "\n${BRED}Error:${RED} ${1}\n\n${BRED}Done: The installation has been terminated.${NC}"
-  fi
+  [[ -n $1 ]] && errline="${1}" || errline="An unknown error has occured"
+  echo -e "\n${BRED} ✖ Error: ${RED}${errline}\n\n${BRED}Done: The installation has been terminated.${NC}"
   exit 1
 }
 
@@ -126,7 +123,7 @@ function assert_common_dependencies() {
 
 function assert_install_dependencies() {
   echo -en "${ST}   Checking dependencies ...                                           "
-  check_dependencies
+  check_dependencies >/dev/null 2>&1
   assert_common_dependencies
   [[ -n $HAS_CURL ]] || perr_depend "curl"
   [[ -n $HAS_AWK ]] || perr_depend "awk"
@@ -390,6 +387,8 @@ function get_ip() {
   declare -a NODE_IPS
   debug_info=''
 
+  echo -en "${ST}   Obtaining external IP address(es)                                   "
+
   if [[ -n $HAS_IP ]]; then
     ifaces=$(ip -o link | awk '!/lo/ {gsub( /\:/, ""); print $2}')
     debug_info="ip -o link: '"$(ip -o link)"'"
@@ -454,6 +453,8 @@ external IP address"
       fi
     fi
   fi
+
+  pok
 }
 
 function print_installed_version() {
@@ -518,7 +519,7 @@ function install_masternode() {
  }
 
 function start_installation() {
-  echo -e "${ST} Starting ${COIN_NAME} installation..."
+  echo -en "${ST} Starting ${COIN_NAME} installation..."
   assert_install_dependencies
   download_and_copy
   configure_daemon 
