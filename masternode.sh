@@ -1,5 +1,5 @@
 #!/bin/bash
-# version 	v1.1.04
+# version 	v1.1.05
 # description:	Installation of an Veles masternode
 # website:      https://veles.network
 # twitter:      https://twitter.com/mdfkbtc
@@ -15,7 +15,7 @@ DATADIR_PATH='/home/veles/.veles'
 COIN_DAEMON='velesd'
 COIN_CLI='veles-cli'
 INSTALL_PATH='/usr/local/bin'
-COIN_TGZ_URL='https://github.com/velescore/veles/releases/download/v0.18.1/veles-0.18.1-generic-linux-amd64.tar.gz'
+COIN_TGZ_URL='https://github.com/velescore/veles/releases/download/v0.18.1.2/veles-0.18.1.2-generic-linux-amd64.tar.gz'
 COIN_NAME='Veles Core'
 COIN_NAME_SHORT='veles'
 COIN_PORT=21337
