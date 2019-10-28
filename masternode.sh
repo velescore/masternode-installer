@@ -1,5 +1,5 @@
 #!/bin/bash
-# version 	v1.1.05
+# version 	v1.1.06
 # description:	Installation of an Veles masternode
 # website:      https://veles.network
 # twitter:      https://twitter.com/mdfkbtc
