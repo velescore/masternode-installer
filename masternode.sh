@@ -340,6 +340,12 @@ listen=1
 server=1
 daemon=1
 port=$COIN_PORT
+## In case of unavailability of hardcoded seeds
+addnode=91.227.43.41
+addnode=45.86.68.137
+addnode=51.75.73.45
+addnode=81.2.239.169
+addnode=80.211.86.93
 EOF
 }
 
