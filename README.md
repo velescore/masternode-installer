@@ -1,9 +1,10 @@
 
-Veles Masternode Installer
-===========================
+Veles Masternode 1.0 Installer
+==============================
 ![Licence](https://img.shields.io/github/license/velescore/veles-installer.svg?style=for-the-badge)   ![Latest Release](https://img.shields.io/github/tag-pre/velescore/veles-installer.svg?style=for-the-badge) ![Master Build Status](https://img.shields.io/travis/com/velescore/veles-installer/master.svg?style=for-the-badge)
 
-Official installer script for Veles Core Masternodes.
+Official installer script for the last stable version of Veles Core Masternode 1st generation. This masternode version will be supported until Q2 2020, then they'll be replaced by [Veles Masternodes 2nd gen.](https://github.com/velescore/veles-masternode) (currently experimental).
+
 
 ## Usage
 The installation / update will start directly when running following command as **root**:
