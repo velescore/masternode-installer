@@ -1,10 +1,17 @@
+Veles Masternode Gen 1 Installer
+================================
+![Master Build Status](https://img.shields.io/travis/velescore/masternode-installer/master?style=for-the-badge) ![Latest Release](https://img.shields.io/github/tag-pre/velescore/masternode-installer.svg?style=for-the-badge) ![Licence](https://img.shields.io/github/license/velescore/masternode-installer?color=blue&style=for-the-badge) 
 
-Veles Masternode 1.0 Installer
-==============================
-![Licence](https://img.shields.io/github/license/velescore/masternode-installer?color=blue&style=for-the-badge)   ![Latest Release](https://img.shields.io/github/tag-pre/velescore/veles-installer.svg?style=for-the-badge) ![Master Build Status](https://img.shields.io/travis/velescore/masternode-installer/master?style=for-the-badge)
+https://veles.network
 
-Official installer script for the last stable version of Veles Core Masternode 1st generation. This masternode version will be supported until Q2 2020, then they'll be replaced by [Veles Masternodes 2nd gen.](https://github.com/velescore/veles-masternode) (currently experimental).
+About Veles
+------------
+Veles Core is an open-source blockchain ecosystem providing services such as decentralized VPN in order to help people to defend their online privacy and free access to an information. 
+Backed by unique blockchain with features such dynamic block rewards and halving schedule, independent multi-algo PoW consensus, protected against common issues such as 51% attacks. Designed as multi-tiered network which builds on the concept of self-incentivized Masternodes which provide robust service and governance layer.
 
+Veles Masternode Gen 1
+----------------------
+This is master branch of official install script for Veles Masternode 1st generation, which is current stable Veles Masternode release until the end of Q1 2020. For latest development version of Veles Masternode and installator visit [Veles Masternode Gen 2](https://github.com/velescore/veles-masternode) repository. 
 
 ## Usage
 The installation / update will start directly when running following command as **root**:
