@@ -33,7 +33,7 @@ declare -A APT_PACKAGES
 declare -A YUM_PACKAGES
 declare -A EMERGE_PACKAGES
 declare -A EQUO_PACKAGES
-APT_PACKAGES=(["ps"]="procps" ["ifconfig"]="net-tools") # net-tools will once be deprecated on all distros, it's fallback for old systems
+APT_PACKAGES=(["ps"]="procps" ["ifconfig"]="net-tools" ["ip"]="iproute2" ["dig"]="dig") # net-tools will once be deprecated on all distros, it's fallback for old systems
 YUM_PACKAGES=(["ps"]="procps" ["ip"]="iproute")
 EMERGE_PACKAGES=(["ps"]="procps" ["ip"]="iproute2")
 EQUO_PACKAGES=(["ps"]="procps" ["ip"]="iproute2")
@@ -111,6 +111,7 @@ function check_dependencies() {
   command -v tar >/dev/null 2>&1        && HAS_TAR=1        || HAS_TAR==''
   command -v useradd -h >/dev/null 2>&1 && HAS_USERADD=1    || HAS_USERADD==''
   command -v systemctl >/dev/null 2>&1  && HAS_SYSTEMCTL==1 || HAS_SYSTEMCTL=''
+  command -v dig >/dev/null 2>&1        && HAS_DIG==1       || HAS_DIG=''
 }
 
 function assert_common_dependencies() {
@@ -127,7 +128,7 @@ function assert_install_dependencies() {
   assert_common_dependencies
   [[ -n $HAS_CURL ]] || perr_depend "curl"
   [[ -n $HAS_AWK ]] || perr_depend "awk"
-  [[ -n $HAS_IP ]] || [[ -n $HAS_IFCONFIG ]] || [[ -n $HAS_NETSTAT ]] || perr_depend "ip"
+  [[ -n $HAS_DIG ]] || [[ -n $HAS_IFCONFIG ]] || [[ -n $HAS_NETSTAT ]] || [[ -n $HAS_IP ]] || perr_depend "dig"
   [[ -n $HAS_USERADD ]] || perr_depend "useradd"
   pok
 }
@@ -395,7 +396,10 @@ function get_ip() {
 
   echo -en "${ST}   Obtaining external IP address(es)                                   "
 
-  if [[ -n $HAS_IP ]]; then
+  if [[ -n $HAS_DIG ]]; then
+    ifaces=$(dig @resolver1.opendns.com ANY myip.opendns.com +short)
+    debug_info="dig @resolver1.opendns.com ANY myip.opendns.com +short: '"$(dig @resolver1.opendns.com ANY myip.opendns.com)"'"
+  elif [[ -n $HAS_IP ]]; then
     ifaces=$(ip -o link | awk '!/lo/ {gsub( /\:/, ""); print $2}')
     debug_info="ip -o link: '"$(ip -o link)"'"
   elif [[ -n $HAS_IFCONFIG ]]; then
