@@ -33,7 +33,7 @@ declare -A APT_PACKAGES
 declare -A YUM_PACKAGES
 declare -A EMERGE_PACKAGES
 declare -A EQUO_PACKAGES
-APT_PACKAGES=(["ps"]="procps" ["ifconfig"]="net-tools" ["ip"]="iproute2" ["dig"]="dig") # net-tools will once be deprecated on all distros, it's fallback for old systems
+APT_PACKAGES=(["ps"]="procps" ["ifconfig"]="net-tools" ["ip"]="iproute2" ["dig"]="dnsutils") # net-tools will once be deprecated on all distros, it's fallback for old systems
 YUM_PACKAGES=(["ps"]="procps" ["ip"]="iproute")
 EMERGE_PACKAGES=(["ps"]="procps" ["ip"]="iproute2")
 EQUO_PACKAGES=(["ps"]="procps" ["ip"]="iproute2")
