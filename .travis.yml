@@ -1,5 +1,5 @@
 os: linux
-dist: xenial
+dist: bionic
 language: bash
 script: make test
 stages:
@@ -10,6 +10,14 @@ jobs:
       name: 'Ubuntu [xenial]  [GOAL: install, update]'
       script:
          - travis_retry sudo make test_install && sudo make test_install
+    - stage: test
+      name: 'Ubuntu 18.04 LTS (Bionic Beaver)  [GOAL: install]'
+      script:
+         - travis_retry sudo docker run --cap-add=NET_ADMIN --rm=true -v `pwd`:/veles-masternode:rw ubuntu:18.04 /bin/bash -c "apt-get update ; apt-get install -q -y wget curl make procps python dnsutils; cd /veles-masternode/; make docker_test_install"
+    - stage: test
+      name: 'Ubuntu 19.04 (Disco Dingo), update [GOAL: install] '
+      script:
+         - travis_retry sudo docker run --cap-add=NET_ADMIN --rm=true -v `pwd`:/veles-masternode:rw ubuntu:19.04 /bin/bash -c "apt-get update ; apt-get install -q -y wget curl make procps python dnsutils; cd /veles-masternode/; make docker_test_install"
     - stage: test
       name: 'Linux Mint [latest]  [GOAL: install]'
       script:

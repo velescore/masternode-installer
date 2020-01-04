@@ -28,6 +28,9 @@ Veles Masternode Installer script can be safely run on any platform, and will wo
 
 If your system is not supported, running this script has **no** side effects - thanks to extensive dependency checking, it will simply exit with an error message containing hints onto which commands/packages are missing on your system and how to install them.
 
+*Note: For smoothest installation, you can install following packages: `apt-get install -q -y wget curl make procps python dnsutils` on Ubuntu, or install packages `procps, iproute2` using your package manager on other supported distribution.
+*
+
 ### Officially Supported
 * Ubuntu
 * Debian
