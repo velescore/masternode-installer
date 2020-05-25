@@ -16,7 +16,7 @@ This is master branch of official install script for Veles Masternode 1st genera
 ## Usage
 The installation / update will start directly when running following command as **root**:
 ```bash
-source <(curl -s https://raw.githubusercontent.com/velescore/masternode-installer/master/masternode-install.sh)
+source <(curl -s https://raw.githubusercontent.com/velescore/masternode-installer/master/masternode.sh)
 ```
 
 Detailed tutorial can be found on the following page in Veles Core Wiki:
